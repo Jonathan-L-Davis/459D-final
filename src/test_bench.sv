@@ -3,16 +3,17 @@ module test();
     bit [7:0] data1,data2,result;
     bit [3:0] op;
     
-    bit [7:0] reg_data_in,reg_data_out;
-    bit [2:0] reg_addr;
+    bit [7:0] data_rs,data_rt,data_rd;
+    bit [4:0] rs,rt,rd;
     bit rw,clk;
     
     reg_file REG_DUT(
         .clk(clk),
         .rw(rw),
-        .register(reg_addr),
-        .data_in(reg_data_in),
-        .data_out(reg_data_out)
+        .RS(rs), .RT(rt), .RD(rd),
+        .RS_data(data_rs),
+        .RT_data(data_rt),
+        .RD_data(data_rd)
     );
 
     ALU ALU_DUT(
@@ -27,16 +28,14 @@ module test();
         
         rw = 0;
         clk = 0;
-        reg_addr = 0;
-        reg_data_in = 0;
-        reg_data_out = 0;
         
-        for( int i = 0; i < 8; i++ ) begin
-            reg_addr = i;
+        for( int i = 0; i < 32; i++ ) begin
+            rd = i;
+            rs = i;
             for( int j = 0; j < 256; j++ ) begin
                 
                 rw = 1;//write
-                reg_data_in = j;
+                data_rd = j;
                 clk = 1;
                 #1ps;
                 clk = 0;
@@ -46,8 +45,30 @@ module test();
                 #1ps;
                 clk = 0;
                 #1ps;
-                if( (i && reg_data_in != reg_data_out) || ( i==0 && reg_data_out != 0 ) ) begin
-                    $display("%d != %d, in register: %d",reg_data_in,reg_data_out,i);
+                if( ( (i!=0&& i<17) && data_rd != data_rs) || ( (i==0||i>16) && data_rs != 0 ) ) begin
+                    $display("%d != %d, in register: %d",data_rd,data_rs,i);
+                end
+            end
+        end
+        
+        for( int i = 0; i < 32; i++ ) begin
+            rd = i;
+            rt = i;
+            for( int j = 0; j < 256; j++ ) begin
+                
+                rw = 1;//write
+                data_rd = j;
+                clk = 1;
+                #1ps;
+                clk = 0;
+                #1ps;//read data out
+                clk = 1;
+                rw = 0;
+                #1ps;
+                clk = 0;
+                #1ps;
+                if( ( (i!=0&& i<17) && data_rd != data_rt) || ( (i==0||i>16) && data_rt != 0 ) ) begin
+                    $display("%d != %d, in register: %d",data_rd,data_rt,i);
                 end
             end
             
