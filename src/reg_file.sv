@@ -24,7 +24,7 @@ module reg_file (
         end
     end
     
-    //NWH
+    
     //assign RS_data = (( !(RS==0) || !(RS > 16)) && !rw) ? file[RS]: 0;
     //assign RT_data = (( !(RT==0) || !(RT > 16)) && !rw) ? file[RT]: 0;
     //assign file[RD] = (( !(RD==0) || !(RD > 16)) && rw) ? data_to_write: 0;
