@@ -1,14 +1,14 @@
 module reg_file (
     input clk, input rw, 
     input [4:0] RS, RT, RD,
-    input [7:0] data_to_write, 
+    input [7:0] RD_data, 
     output reg [7:0] RS_data, RT_data);
     
     reg [7:0] file [16:1];
 
-    always(@posedge clk)begin
+    always @(posedge clk)begin
         if((( !(RD==0) || !(RD > 16)) && rw))begin
-            file[RD] <= data_to_write;
+            file[RD] <= RD_data;
         end else if (!rw) begin
             if((( !(RS==0) || !(RS > 16))))begin
                 RS_data <= file[RS];
