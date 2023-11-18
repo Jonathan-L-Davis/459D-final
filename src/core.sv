@@ -6,10 +6,10 @@ module core (
     input bit[9:0] address
     );
     
-    parameter o_ALU   = 0;
-    parameter o_JMP   = 0;
-    parameter o_JEQ   = 0;
-    parameter o_ALUI   = 0;
+    parameter o_ALU   =  0;
+    parameter o_JMP   =  2;
+    parameter o_JEQ   =  4;
+    parameter o_ALUI  =  8;
     parameter o_LOAD  = 32;
     parameter o_STORE = 40;
     
