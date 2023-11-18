@@ -29,7 +29,7 @@ module test();
         rw = 0;
         clk = 0;
         
-        for( int i = 0; i < 32; i++ ) begin
+        for( int i = 0; i < 8; i++ ) begin
             rd = i;
             rs = i;
             for( int j = 0; j < 256; j++ ) begin
@@ -45,13 +45,13 @@ module test();
                 #1ps;
                 clk = 0;
                 #1ps;
-                if( ( (i!=0&& i<17) && data_rd != data_rs) || ( (i==0||i>16) && data_rs != 0 ) ) begin
+                if( ( i && data_rd != data_rs ) || ( !i && data_rs != 0 ) ) begin
                     $display("%d != %d, in register: %d",data_rd,data_rs,i);
                 end
             end
         end
         
-        for( int i = 0; i < 32; i++ ) begin
+        for( int i = 0; i < 8; i++ ) begin
             rd = i;
             rt = i;
             for( int j = 0; j < 256; j++ ) begin
@@ -67,7 +67,7 @@ module test();
                 #1ps;
                 clk = 0;
                 #1ps;
-                if( ( (i!=0&& i<17) && data_rd != data_rt) || ( (i==0||i>16) && data_rt != 0 ) ) begin
+                if( ( i && data_rd != data_rt ) || ( !i && data_rt != 0 ) ) begin
                     $display("%d != %d, in register: %d",data_rd,data_rt,i);
                 end
             end

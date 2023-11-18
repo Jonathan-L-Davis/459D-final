@@ -1,32 +1,37 @@
 module reg_file (
-    input clk, input rw, 
-    input [4:0] RS, RT, RD,
+    input clk, input rw, input reset, 
+    input [2:0] RS, RT, RD,
     input [7:0] RD_data, 
     output reg [7:0] RS_data, RT_data);
     
-    reg [7:0] file [16:1];
-
+    reg [7:0] file [7:1];
+    
     always @(posedge clk)begin
-        if((( !(RD==0) || !(RD > 16)) && rw))begin
+        
+        if( RD ) && rw))begin
             file[RD] <= RD_data;
-        end else if (!rw) begin
-            if((( !(RS==0) || !(RS > 16))))begin
+        end else begin
+            
+            if( RS )begin
                 RS_data <= file[RS];
             end else begin
                 RS_data <= 0;
             end
-
-            if((( !(RT==0) || !(RT > 16))))begin
+            
+            if( RT )begin
                 RT_data <= file[RT];
             end else begin
                 RT_data <= 0;
             end
+            
+        end
+    
+        if(reset) begin
+            for( int i = 1; i < 8; i++ )
+                file[i] = 0;
+            RS_data = 0;
+            RD_data = 0;
         end
     end
-    
-    
-    //assign RS_data = (( !(RS==0) || !(RS > 16)) && !rw) ? file[RS]: 0;
-    //assign RT_data = (( !(RT==0) || !(RT > 16)) && !rw) ? file[RT]: 0;
-    //assign file[RD] = (( !(RD==0) || !(RD > 16)) && rw) ? data_to_write: 0;
     
 endmodule
