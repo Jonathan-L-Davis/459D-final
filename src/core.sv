@@ -3,7 +3,7 @@ module core (
     input bit grant_given, 
     output bit grant_request, output bit rw,
     input bit[7:0] data_in, output bit[7:0] data_out,
-    input bit[9:0] address
+    input bit[8:0] address//upper bit is flag for gpio
     );
     
     parameter o_ALU   =  0;
@@ -22,6 +22,7 @@ module core (
     //cpu internal state
     bit [3:0] state;
     
+    bit
     bit [7:0] PC;
     bit [31:0] IR;
     
@@ -33,7 +34,7 @@ module core (
     
     //ALU controls
     bit [7:0] alu_data1,alu_data2,alu_result;
-    bit [3:0] alu_op;
+    bit [3:0] alu_op;// 0 for add, 1 for sub, 2 for and, 3 for or, 4 for slt
     
     //register file controls
     bit [7:0] data_rs,data_rt,data_rd;
@@ -96,7 +97,7 @@ module core (
         
         /*
         * 
-        * each step/state may take more than 1 clock cycle, 
+        * each step/state may take more than 1 clock cycle,
         * each fetch step waits until the bus returns a grant_given == 1
         * 
         * 
@@ -149,66 +150,85 @@ module core (
                 end
             end
             4: begin// decode
-                instr_opcode <= IR[31:6];
+                instr_opcode <= IR[31:26];
                 instr_func <= IR[5:0];
                 
                 case(instr_opcode)
-                    //changed logic for alu and register io based on instruction. 
-                    o_ALU: //0://ALU
-                        rs <= IR[25:21];
-                        rt <= IR[20:16];
-                        rd <= IR[15:11];
-                        alu_data1 <= data_rs;
+                    //changed logic for alu and register io based on instruction.
+                    o_ALU:
+                        rw = 0;
+                        rs <= IR[23:21];
+                        rt <= IR[18:16];
+                        rd <= IR[13:11];
+                        alu_data1 <= data_rs;// incorrect until clock cycle happens
                         alu_data2 <= data_rt;
-                        case(instr_func)
-                            f_ADD:
-                                //alu_data2 <= data_rt;
-                            f_SUB:
-                                //alu_data2 <= data_rt;
-                            f_AND:
-                                //alu_data2 <= data_rt;
-                            f_OR:
-                                //alu_data2 <= data_rt;
-                            f_SLT:
-                                //alu_data2 <= data_rt;
-
-                    o_JMP: //2://JMP
-                        jump_addr <= IR[25:0]
+                        case(instr_func)//set operation and wait until execute cycle to grab the result
+                            f_ADD: begin
+                                alu_op = 0;
+                            end
+                            f_SUB: begin
+                                alu_op = 1;
+                            end
+                            f_AND: begin
+                                alu_op = 2;
+                            end
+                            f_OR: begin
+                                alu_op = 3;
+                            end
+                            f_SLT: begin
+                                alu_op = 4;
+                            end
+                        endcase
+                    o_JMP: begin
+                        jump_addr <= IR[25:0];
                         PC <= jump_addr[7:0];
-                    o_JEQ: //4://
+                    end
+                    o_JEQ: begin
                         //need to add logic somewhere for comparison. 
-                        rs <= IR[25:21];
-                        rt <= IR[20:16];
+                        rs <= IR[23:21];
+                        rt <= IR[18:16];
+                        alu_op = 5;//xor, if 0 they are equal
+                    end
+                    o_ALUI: begin// add immmedidate
+                        rs <= IR[23:21];
                         immediate_addr <= IR[15:0];
-                        alu_data1 <= data_rs;//? these may or not be needed depending on if ALU does this comparison
-                        alu_data2 <= data_rt;//?
-                        PC <= PC + immediate_addr[7:0] - 4;
-                    //0://
-                    o_ALUI: //8:// add immmedidate
-                        rs <= IR[25:21];
-                        rt <= IR[20:16];
-                        immediate_addr <= IR[15:0];
-                        alu_data1 <= data_rt;
+                        alu_data1 <= data_rs;
                         alu_data2 <= immediate_addr[7:0];
-
-                    o_LOAD: //32://
-                        rs <= IR[25:21];
-                        rt <= IR[20:16];
-                        immediate_addr <= IR[15:0];
-                        //more needed
-
-                    o_STORE: //40://
-                        rs <= IR[25:21];
-                        rt <= IR[20:16];
-                        immediate_addr <= IR[15:0];
-                        //more needed
-
+                    end
+                    o_LOAD: begin
+                    end
+                    o_STORE: begin
+                    end
                 endcase
-                
             end
-            5: begin// execute
+            5: begin// execute, not all instructions hit this point
+                case(instr_opcode)
+                    o_ALU:begin
+                        alu_data1 <= data_rs;
+                        alu_data2 <= data_rd;
+                        state <= 6;
+                    end
+                    o_ALUI: begin
+                        alu_data1 <= data_rs;
+                        alu_data2 <= immediate_addr[7:0];
+                        state <= 6;
+                    end
+                    o_JEQ: begin
+                        if( alu_result == 0 )
+                            PC <= IR[7:0];
+                        state <= 6;
+                    end
+                endcase
             end
-            default:state = 0;//reset if in unknown state
+            6: begin// execute, not all instructions hit this point
+                case(instr_opcode)
+                    o_ALU,o_ALUI: data_rd = alu_result;
+                endcase
+            end
+            default: begin 
+                state = 0;//reset if in unknown state
+                PC = 0;//start at address 0
+            end
         endcase
         end
     end
