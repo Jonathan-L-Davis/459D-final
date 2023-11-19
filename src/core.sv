@@ -25,8 +25,11 @@ module core (
     bit [7:0] PC;
     bit [31:0] IR;
     
+    //instruction formats
     bit [5:0] instr_opcode,instr_func;
-    
+    //added these variables to parse instruction
+    bit [25:0] jump_addr;
+    bit [15:0] immediate_addr;
     
     //ALU controls
     bit [7:0] alu_data1,alu_data2,alu_result;
@@ -53,6 +56,15 @@ module core (
         .op(alu_op),
         .out(alu_result)
     );
+
+    // mux4_1_8bit ALUsrcBsel(
+    //     .source(), 
+    //     .a(), 
+    //     .b(), 
+    //     .c(), 
+    //     .d(), 
+    //     .out(alu_data2)
+    //     );
     
     always @ (posedge clk) begin
         
@@ -141,13 +153,56 @@ module core (
                 instr_func <= IR[5:0];
                 
                 case(instr_opcode)
-                    0:
-                    2:
-                    4:
-                    0:
-                    8:
-                    32:
-                    40:
+                    //changed logic for alu and register io based on instruction. 
+                    o_ALU: //0://ALU
+                        rs <= IR[25:21];
+                        rt <= IR[20:16];
+                        rd <= IR[15:11];
+                        alu_data1 <= data_rs;
+                        alu_data2 <= data_rt;
+                        case(instr_func)
+                            f_ADD:
+                                //alu_data2 <= data_rt;
+                            f_SUB:
+                                //alu_data2 <= data_rt;
+                            f_AND:
+                                //alu_data2 <= data_rt;
+                            f_OR:
+                                //alu_data2 <= data_rt;
+                            f_SLT:
+                                //alu_data2 <= data_rt;
+
+                    o_JMP: //2://JMP
+                        jump_addr <= IR[25:0]
+                        PC <= jump_addr[7:0];
+                    o_JEQ: //4://
+                        //need to add logic somewhere for comparison. 
+                        rs <= IR[25:21];
+                        rt <= IR[20:16];
+                        immediate_addr <= IR[15:0];
+                        alu_data1 <= data_rs;//? these may or not be needed depending on if ALU does this comparison
+                        alu_data2 <= data_rt;//?
+                        PC <= PC + immediate_addr[7:0] - 4;
+                    //0://
+                    o_ALUI: //8:// add immmedidate
+                        rs <= IR[25:21];
+                        rt <= IR[20:16];
+                        immediate_addr <= IR[15:0];
+                        alu_data1 <= data_rt;
+                        alu_data2 <= immediate_addr[7:0];
+
+                    o_LOAD: //32://
+                        rs <= IR[25:21];
+                        rt <= IR[20:16];
+                        immediate_addr <= IR[15:0];
+                        //more needed
+
+                    o_STORE: //40://
+                        rs <= IR[25:21];
+                        rt <= IR[20:16];
+                        immediate_addr <= IR[15:0];
+                        //more needed
+
                 endcase
                 
             end
