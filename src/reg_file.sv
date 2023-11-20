@@ -12,10 +12,10 @@ module reg_file (
             for( int i = 1; i < 8; i++ )
                 file[i] = 0;
             RS_data <= 0;
-            RD_data <= 0;
+            RT_data <= 0;
         end else begin
             
-            if( RD ) && rw))begin
+            if( RD && rw )begin
                 file[RD] <= RD_data;
             end else begin
                 
