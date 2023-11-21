@@ -11,18 +11,19 @@ logic [7:0] add_result;
 logic [7:0] sub_result;
 logic [7:0] and_result;
 logic [7:0]  or_result;
+logic [7:0] xor_result;
 logic [7:0] slt_result;
 
 
 assign selReg[0] = reg_1;
 assign selReg[1] = reg_2;
 
-assign add_result <= selReg[0]+selReg[1];
-assign sub_result <= selReg[0]-selReg[1];
-assign  or_result <= selReg[0]|selReg[1];
-assign and_result <= selReg[0]&selReg[1];
-assign slt_result <= selReg[0]<selReg[1];
-assign slt_result <= selReg[0]^selReg[1];
+assign add_result = selReg[0]+selReg[1];
+assign sub_result = selReg[0]-selReg[1];
+assign  or_result = selReg[0]|selReg[1];
+assign and_result = selReg[0]&selReg[1];
+assign slt_result = selReg[0]<selReg[1];
+assign xor_result = selReg[0]^selReg[1];
 
 
 always @* begin//used to update ALU flags, removed flags for now.

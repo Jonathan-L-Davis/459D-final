@@ -17,12 +17,12 @@ module core (
     parameter f_SUB = 34;
     parameter f_AND = 36;
     parameter f_OR  = 37;
+    parameter f_XOR = 38;
     parameter f_SLT = 42;
     
     //cpu internal state
     bit [3:0] state;
     
-    bit
     bit [7:0] PC;
     bit [31:0] IR;
     
@@ -43,7 +43,7 @@ module core (
     
     reg_file REG_DUT(
         .clk(clk),
-        .reset(reset)
+        .reset(reset),
         .rw(reg_rw),
         .RS(rs), .RT(rt), .RD(rd),
         .RS_data(data_rs),
@@ -82,12 +82,12 @@ module core (
             //set ALU controls to 0;
             alu_data1 = 0;
             alu_data2 = 0;
-            alu_result = 0;
+            //alu_result = 0;
             alu_op = 0;
             
             //set register controls to 0;
-            data_rs = 0;
-            data_rt = 0;
+            //data_rs = 0;
+            //data_rt = 0;
             data_rd = 0;
             rs = 0;
             rt = 0;
@@ -107,7 +107,7 @@ module core (
         case(state)
             0: begin//fetch - bigendian instructions
                 if( grant_given == 0 ) begin
-                    address <= '{1'b0,PC};
+                    address <= {1'b0,PC};
                     grant_request <= 1;
                 end else begin
                     PC <= PC + 1;
@@ -118,7 +118,7 @@ module core (
             end
             1: begin//fetch
                 if( grant_given == 0 ) begin
-                    address <= '{1'b0,PC};
+                    address <= {1'b0,PC};
                     grant_request <= 1;
                 end else begin
                     PC <= PC + 1;
@@ -129,7 +129,7 @@ module core (
             end
             2: begin//fetch
                 if( grant_given == 0 ) begin
-                    address <= '{1'b0,PC};
+                    address <= {1'b0,PC};
                     grant_request <= 1;
                 end else begin
                     PC <= PC + 1;
@@ -140,7 +140,7 @@ module core (
             end
             3: begin//fetch
                 if( grant_given == 0 ) begin
-                    address <= '{1'b0,PC};
+                    address <= {1'b0,PC};
                     grant_request <= 1;
                 end else begin
                     PC <= PC + 1;
@@ -149,13 +149,13 @@ module core (
                     state <= 4;
                 end
             end
-            4: begin// decode
+            4: begin// decode/execute
                 instr_opcode <= IR[31:26];
                 instr_func <= IR[5:0];
                 
                 case(instr_opcode)
                     //changed logic for alu and register io based on instruction.
-                    o_ALU:
+                    o_ALU: begin
                         rw = 0;
                         rs <= IR[23:21];
                         rt <= IR[18:16];
@@ -164,48 +164,67 @@ module core (
                         alu_data2 <= data_rt;
                         case(instr_func)//set operation and wait until execute cycle to grab the result
                             f_ADD: begin
-                                alu_op = 0;
+                                alu_op <= 0;
                             end
                             f_SUB: begin
-                                alu_op = 1;
+                                alu_op <= 1;
                             end
                             f_AND: begin
-                                alu_op = 2;
+                                alu_op <= 2;
                             end
                             f_OR: begin
-                                alu_op = 3;
+                                alu_op <= 3;
                             end
                             f_SLT: begin
-                                alu_op = 4;
+                                alu_op <= 4;
+                            end
+                            f_XOR: begin
+                                alu_op <= 5;
                             end
                         endcase
+                        state <= 5;
+                    end
                     o_JMP: begin
                         jump_addr <= IR[25:0];
                         PC <= jump_addr[7:0];
+                        state <= 0;
                     end
                     o_JEQ: begin
                         //need to add logic somewhere for comparison. 
                         rs <= IR[23:21];
                         rt <= IR[18:16];
                         alu_op = 5;//xor, if 0 they are equal
+                        state <= 5;
                     end
                     o_ALUI: begin// add immmedidate
                         rs <= IR[23:21];
                         immediate_addr <= IR[15:0];
                         alu_data1 <= data_rs;
                         alu_data2 <= immediate_addr[7:0];
+                        state <= 5;
                     end
                     o_LOAD: begin
+                        if( grant_given == 0 ) begin
+                            address <= {1'b0,IR[8:0]};
+                            grant_request <= 1;
+                        end else begin
+                            grant_request = 0;
+                            data_rd <= data_in;//gets set on next clock cycle
+                            state <= 0;
+                        end
                     end
                     o_STORE: begin
-                    end
+                            address <= {1'b0,IR[8:0]};
+                            state <= 5;
+                        end
+                    //end
                 endcase
             end
             5: begin// execute, not all instructions hit this point
                 case(instr_opcode)
-                    o_ALU:begin
+                    o_ALU,o_JEQ:begin
                         alu_data1 <= data_rs;
-                        alu_data2 <= data_rd;
+                        alu_data2 <= data_rt;
                         state <= 6;
                     end
                     o_ALUI: begin
@@ -213,19 +232,32 @@ module core (
                         alu_data2 <= immediate_addr[7:0];
                         state <= 6;
                     end
-                    o_JEQ: begin
-                        if( alu_result == 0 )
-                            PC <= IR[7:0];
-                        state <= 6;
+                    o_STORE: begin//at least 2 cycles here
+                        if( grant_given == 0 ) begin
+                            grant_request <= 1;
+                            data_out <= data_rd;
+                        end else begin
+                            grant_request <= 0;
+                            data_rd <= data_in;
+                            state <= 5;
+                        end
                     end
                 endcase
             end
             6: begin// execute, not all instructions hit this point
                 case(instr_opcode)
-                    o_ALU,o_ALUI: data_rd = alu_result;
+                    o_ALU,o_ALUI: begin 
+                        data_rd <= alu_result;
+                        state <= 0;
+                    end
+                    o_JEQ: begin
+                        if( alu_result == 0 )
+                            PC = PC + IR[7:0] - 4;
+                        state <= 0;
+                    end
                 endcase
             end
-            default: begin 
+            default: begin
                 state = 0;//reset if in unknown state
                 PC = 0;//start at address 0
             end
