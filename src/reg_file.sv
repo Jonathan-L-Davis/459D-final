@@ -19,6 +19,7 @@ module reg_file (
                 file[RD] <= RD_data;
             end else begin
                 
+                /*
                 if( RS )begin
                     RS_data <= file[RS];
                 end else begin
@@ -29,11 +30,14 @@ module reg_file (
                     RT_data <= file[RT];
                 end else begin
                     RT_data <= 0;
-                end
+                end//*/
                 
             end
             
         end
     end
+    
+    assign RS_data = file[RS];
+    assign RT_data = file[RT];
     
 endmodule

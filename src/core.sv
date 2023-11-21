@@ -3,7 +3,7 @@ module core (
     input bit grant_given, 
     output bit grant_request, output bit rw,
     input bit[7:0] data_in, output bit[7:0] data_out,
-    input bit[8:0] address//upper bit is flag for gpio
+    output bit[8:0] address//upper bit is flag for gpio
     );
     
     parameter o_ALU   =  0;
@@ -106,6 +106,7 @@ module core (
         
         case(state)
             0: begin//fetch - bigendian instructions
+                reg_rw <= 0;//reset reg_write
                 if( grant_given == 0 ) begin
                     address <= {1'b0,PC};
                     grant_request <= 1;
@@ -239,6 +240,7 @@ module core (
                         end else begin
                             grant_request <= 0;
                             data_rd <= data_in;
+                            reg_rw <= 1;
                             state <= 5;
                         end
                     end
@@ -248,6 +250,7 @@ module core (
                 case(instr_opcode)
                     o_ALU,o_ALUI: begin 
                         data_rd <= alu_result;
+                        reg_rw <= 1;
                         state <= 0;
                     end
                     o_JEQ: begin
