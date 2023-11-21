@@ -1,7 +1,8 @@
 module ALU( 
     input bit [7:0] reg_1, input bit [7:0] reg_2,// input data
     input bit [3:0]op,// function
-    output bit [7:0] out);// output data
+    output bit [7:0] out
+    output bit zero_flag);// output data
 
 logic [15:0] selReg[1:0];
 logic [15:0] midReg[1:0];
@@ -38,6 +39,7 @@ always @* begin//*
     4: out <= slt_result;
     5: out <= xor_result;
     endcase//*/
+    assign zero_flag = (out==0)? 1:0;
 end
 
 
