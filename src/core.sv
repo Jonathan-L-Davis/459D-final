@@ -3,7 +3,7 @@ module core (
     input bit grant_given, 
     output bit grant_request, output bit rw,
     input bit[7:0] data_in, output bit[7:0] data_out,
-    output bit[8:0] address//upper bit is flag for gpio
+    output bit[9:0] address//upper bit is flag for gpio
     );
     
     parameter o_ALU   =  0;
@@ -41,7 +41,7 @@ module core (
     bit [4:0] rs,rt,rd;
     bit reg_rw;
     
-    reg_file REG_DUT(
+    reg_file register_file(
         .clk(clk),
         .reset(reset),
         .rw(reg_rw),
@@ -51,7 +51,7 @@ module core (
         .RD_data(data_rd)
     );
     
-    ALU ALU_DUT(
+    ALU alu(
         .reg_1(alu_data1),
         .reg_2(alu_data2),
         .op(alu_op),
