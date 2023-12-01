@@ -1,4 +1,4 @@
-module flop (input clk, reset, en,
+module flopenr (input clk, reset, en,
     input [7:0] d, 
     output reg [7:0] q
     );

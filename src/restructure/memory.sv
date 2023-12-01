@@ -1,5 +1,5 @@
 module memory (input clk, input rw_select,
- input [9:0] address, input [7:0] data_in, 
+ input [8:0] address, input [7:0] data_in, 
  output [7:0] data_out
  );
     reg [7:0] RAM[511:0];
