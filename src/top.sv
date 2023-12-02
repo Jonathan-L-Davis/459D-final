@@ -1,73 +1,99 @@
 module top(
-    input clk_100MH, input isMealy_main, 
-    input rst, input ctrl_input_main, 
-    output reg clock_led,
+    input clk_100MHz, 
+    input rst,
     input [1:0] SW_input_main, 
-    output [3:0] Anode_Activate_main,
-    output [6:0] LED_out_main    
+    output [3:0] Anode_Activate,
+    output [6:0] LED_out,
+    input [3:0] buttons,
+    input [15:0] switches,
+    output [15:0] leds,
+       
 );
+
+
+
+//vars for disp
+reg [3:0] digit3, digit2, digit1, digit0;
+
+//vars for gpiomem
+ reg [7:0] data_out_mem, data_in_mem;
+ reg [8:0] address_mem;
+ reg rw_mem;
+
+//vars for core0
+reg grant_given_cpu0, grant_request_cpu0, rw_cpu0;
+reg[7:0] data_in_cpu0, data_out_cpu0;
+reg[9:0] address_cpu0;
+
+//vars for core1
+reg grant_given_cpu1, grant_request_cpu1, rw_cpu1;
+reg[7:0] data_in_cpu1, data_out_cpu1;
+reg[9:0] address_cpu1;
 
 module display(
-    input clk_100MHz_disp, 
-    input [3:0] digit3, 
-    input [3:0] digit2, 
-    input [3:0] digit1,
-    input [3:0] digit0, 
-    output reg [3:0] Anode_Activate_disp, 
-    output reg [6:0] LED_out_disp
+    .clk_100MHz_disp(clk_100MHz), 
+    .digit3(digit3), 
+    .digit2(digit2), 
+    .digit1(digit1),
+    .digit0(digit0), 
+    .Anode_Activate_disp(Anode_Activate_main), 
+    .LED_out_disp(LED_out_main)
 );
 
- gpiomem gpio (input .clk(), input .rw_select,
- input [8:0] address, input [7:0] data_in, 
- output [7:0] data_out,
 
- input [3:0] buttons,
- input [15:0] switches,
- output [15:0] leds,
- output [3:0] digit3, digit2, digit1, digit0    
+ gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
+    .address(address_mem), .data_in(data_in_mem), 
+    .data_out(data_out_mem),
+    .buttons(buttons),
+    .switches(switches),
+    .leds(leds),
+    .digit3(digit3), .digit2(digit2), .digit1(digit1), .digit0(digit0)    
  );
 
 
  core core0 (
-    input bit .clk(), input bit .reset(),
-    input bit .grant_given(), 
-    output bit .grant_request(), output bit .rw(),
-    input bit[7:0] .data_in(), output bit[7:0] .data_out(),
-    output bit[9:0] .address()//upper bit is flag for gpio
+    .clk(clk_100MHz), input bit .reset(rst),
+    .grant_given(grant_given_cpu0), 
+    .grant_request(grant_request_cpu0),
+    .rw(rw_cpu0),
+    .data_in(data_in_cpu0), 
+    .data_out(data_out_cpu0),
+    .address(address_cpu0)
     );
 
+
  core core1 (
-    input bit .clk(), input bit .reset(),
-    input bit .grant_given(), 
-    output bit .grant_request(), output bit .rw(),
-    input bit[7:0] .data_in(), output bit[7:0] .data_out(),
-    output bit[9:0] .address()//upper bit is flag for gpio
+    .clk(clk_100MHz), .reset(rst),
+    .grant_given(grant_given_cpu1), 
+    .grant_request(grant_request_cpu1), 
+    .rw(rw_cpu1),
+    .data_in(data_in_cpu1),
+    .data_out(data_out_cpu1),
+    .address(address_cpu1)
     );
 
 bus system_bus(
-    input bit .clk(),
-    input bit .reset(),
-    //core 0 interface
-    input bit .core0_request(),
-    output bit .core0_grant(),
-    input bit [7:0] .core0_data_in(),
-    output bit [7:0] .core0_data_out(),
-    input bit .core0_address(),
+    .clk(clk_100MHz),
+    .reset(rst),
+
+    .core0_request(grant_request_cpu0),
+    .core0_grant(grant_given_cpu0),
+    .core0_data_in(data_out_cpu0),
+    .core0_data_out(data_in_cpu0),
+    .core0_address(address_cpu0),
+    .core0_rw(rw_cpu0),
     
-    //core 1 interface
-    input bit .core1_request(),
-    output bit .core1_grant(),
-    input bit [7:0] .core1_data(),
-    output bit [7:0] .core1_data_out(),
-    input bit .core1_address(),
+    .core1_request(grant_request_cpu1),
+    .core1_grant(grant_given_cpu1),
+    .core1_data(data_out_cpu1),
+    .core1_data_out(data_in_cpu1),
+    .core1_address(address_cpu1),
+    .core1_rw(rw_cpu1),
     
-    //RAM interface
-    output bit [8:0] .RAM_address(),
-    output bit [7:0] .RAM_data_in(),
-    input bit  [7:0] .RAM_data_out(),
-    output bit .rw()
-    //GPIO interface
-    
+    .RAM_address(address_mem),
+    .RAM_data_in(data_in_mem),
+    .RAM_data_out(data_out_mem),
+    .rw(rw_mem)    
 );
 
 
