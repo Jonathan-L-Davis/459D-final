@@ -68,6 +68,7 @@ reg pcwrite, pcwritecond;
                         nextstate <= MEMADR;
                     default:
                         nextstate <= FETCH1;
+                  endcase
             MEMADR:
                 case(op)
                     LB:

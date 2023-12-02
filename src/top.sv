@@ -6,8 +6,7 @@ module top(
     output [6:0] LED_out,
     input [3:0] buttons,
     input [15:0] switches,
-    output [15:0] leds,
-       
+    output [15:0] leds       
 );
 
 
@@ -23,21 +22,21 @@ reg [3:0] digit3, digit2, digit1, digit0;
 //vars for core0
 reg grant_given_cpu0, grant_request_cpu0, rw_cpu0;
 reg[7:0] data_in_cpu0, data_out_cpu0;
-reg[9:0] address_cpu0;
+reg[8:0] address_cpu0;
 
 //vars for core1
 reg grant_given_cpu1, grant_request_cpu1, rw_cpu1;
 reg[7:0] data_in_cpu1, data_out_cpu1;
-reg[9:0] address_cpu1;
+reg[8:0] address_cpu1;
 
-module display(
+display disp(
     .clk_100MHz_disp(clk_100MHz), 
     .digit3(digit3), 
     .digit2(digit2), 
     .digit1(digit1),
     .digit0(digit0), 
-    .Anode_Activate_disp(Anode_Activate_main), 
-    .LED_out_disp(LED_out_main)
+    .Anode_Activate_disp(Anode_Activate), 
+    .LED_out_disp(LED_out)
 );
 
 
@@ -52,7 +51,7 @@ module display(
 
 
  core core0 (
-    .clk(clk_100MHz), input bit .reset(rst),
+    .clk(clk_100MHz),.reset(rst),
     .grant_given(grant_given_cpu0), 
     .grant_request(grant_request_cpu0),
     .rw(rw_cpu0),
