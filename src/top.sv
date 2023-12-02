@@ -6,8 +6,7 @@ module top(
     output [6:0] LED_out,
     input [3:0] buttons,
     input [15:0] switches,
-    output [15:0] leds,
-       
+    output [15:0] leds       
 );
 
 
