@@ -6,20 +6,22 @@ module bus(
     output bit core0_grant,
     input bit [7:0] core0_data_in,
     output bit [7:0] core0_data_out,
-    input bit core0_address,
+    input bit [9:0] core0_address,
+    input bit core0_rw,
     
     //core 1 interface
     input bit core1_request,
     output bit core1_grant,
     input bit [7:0] core1_data,
     output bit [7:0] core1_data_out,
-    input bit core1_address,
+    input bit [9:0] core1_address,
+    input bit core1_rw,
     
     //RAM interface
     output bit [8:0] RAM_address,
     output bit [7:0] RAM_data_in,
     input bit  [7:0] RAM_data_out,
-    output bit rw
+    output bit rw_RAM
     
 );
     
