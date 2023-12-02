@@ -23,12 +23,12 @@ reg [3:0] digit3, digit2, digit1, digit0;
 //vars for core0
 reg grant_given_cpu0, grant_request_cpu0, rw_cpu0;
 reg[7:0] data_in_cpu0, data_out_cpu0;
-reg[9:0] address_cpu0;
+reg[8:0] address_cpu0;
 
 //vars for core1
 reg grant_given_cpu1, grant_request_cpu1, rw_cpu1;
 reg[7:0] data_in_cpu1, data_out_cpu1;
-reg[9:0] address_cpu1;
+reg[8:0] address_cpu1;
 
 module display(
     .clk_100MHz_disp(clk_100MHz), 
