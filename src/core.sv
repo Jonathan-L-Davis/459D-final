@@ -3,7 +3,7 @@ module core (
     input bit grant_given, 
     output bit grant_request, output bit rw,
     input bit[7:0] data_in, output bit[7:0] data_out,
-    output bit[9:0] address//upper bit is flag for gpio
+    output bit [8:0] address//upper bit is flag for gpio
     );
     
     parameter o_ALU   =  0;
