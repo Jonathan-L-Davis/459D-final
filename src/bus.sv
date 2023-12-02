@@ -1,6 +1,7 @@
 module bus(
     input bit clk,
     input bit reset,
+    
     //core 0 interface
     input bit core0_request,
     output bit core0_grant,
@@ -11,7 +12,7 @@ module bus(
     //core 1 interface
     input bit core1_request,
     output bit core1_grant,
-    input bit [7:0] core1_data,
+    input bit [7:0] core1_data_in,
     output bit [7:0] core1_data_out,
     input bit core1_address,
     
@@ -28,6 +29,11 @@ module bus(
     bit [1:0] grant_request;
     bit [1:0] grant_request_type;
     bit patron;
+    
+    bit [8:0] addr [1:0];
+    bit [7:0] data_in [1:0];
+    bit [7:0] data_out [1:0];
+    
     parameter wait_state = 0;
     parameter write_state = 1;
     parameter read_request_state = 2;
@@ -41,25 +47,20 @@ module bus(
             core1_grant <= 0;
             rw <= 0;
             patron <= 0;
-        end else if( core0_request && !in_progress[1] && !in_progress[0]) begin
+        end else begin
             case(state)
             wait_state: begin
                 if( grant_request[~patron] ) begin//give priority to least recent core
                     patron <= ~patron;
-                    case(core)
+                    case(grant_request_type[~patron])
                         0: state <= write_state;
                         1: state <= read_request_state;
                     endcase
                 end else if(grant_request[patron]) begin
-                    case(core)
+                    case(grant_request_type[patron])
                         0: state <= write_state;
                         1: state <= read_request_state;
                     endcase
-                end
-                if( req[patron] ) begin
-                    state <= req_type[patron]+1;
-                end else if( req[~patron] )
-                    
                 end
             end
             write_state: begin
@@ -74,13 +75,17 @@ module bus(
                 state <= read_deliver_state;
             end
             read_deliver_state: begin
-                data_out <= RAM_data_out;
+                data_out[patron] <= RAM_data_out;
                 state <= wait_state;
             end
             endcase
         end
     end
     
+    assign core0_data_out = data_out[0];
+    assign core1_data_out = data_out[1];
+    assign data_in[0] = core0_data_in;
+    assign data_in[1] = core1_data_in;
     
     
 endmodule
