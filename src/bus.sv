@@ -4,6 +4,7 @@ module bus(
     
     //core 0 interface
     input bit core0_request,
+    input bit core0_rw,
     output bit core0_grant,
     input bit [7:0] core0_data_in,
     output bit [7:0] core0_data_out,
@@ -11,6 +12,7 @@ module bus(
     
     //core 1 interface
     input bit core1_request,
+    input bit core1_rw,
     output bit core1_grant,
     input bit [7:0] core1_data_in,
     output bit [7:0] core1_data_out,
@@ -86,6 +88,10 @@ module bus(
     assign core1_data_out = data_out[1];
     assign data_in[0] = core0_data_in;
     assign data_in[1] = core1_data_in;
+    assign grant_request[0] = core0_request;
+    assign grant_request[1] = core1_request;
+    assign grant_request_type[0] = core0_rw;
+    assign grant_request_type[1] = core1_rw;
     
     
 endmodule
