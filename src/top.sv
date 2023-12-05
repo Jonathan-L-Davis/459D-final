@@ -1,7 +1,6 @@
 module top(
     input clk_100MHz, 
     input rst,
-    input [1:0] SW_input_main, 
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
     input [3:0] buttons,
