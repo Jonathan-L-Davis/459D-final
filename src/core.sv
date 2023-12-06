@@ -58,15 +58,6 @@ module core (
         .out(alu_result)
     );
 
-    // mux4_1_8bit ALUsrcBsel(
-    //     .source(), 
-    //     .a(), 
-    //     .b(), 
-    //     .c(), 
-    //     .d(), 
-    //     .out(alu_data2)
-    //     );
-    
     always @ (posedge clk) begin
         
         if( reset ) begin
@@ -157,7 +148,7 @@ module core (
                 case(instr_opcode)
                     //changed logic for alu and register io based on instruction.
                     o_ALU: begin
-                        rw = 0;
+                        rw <= 0;
                         rs <= IR[23:21];
                         rt <= IR[18:16];
                         rd <= IR[13:11];
@@ -205,9 +196,12 @@ module core (
                         state <= 5;
                     end
                     o_LOAD: begin
+                        reg_rw <= ~reg_rw;
+                        data_rd <= data_rd + 1;                        
                         if( grant_given == 0 ) begin
                             address <= {1'b0,IR[8:0]};
                             grant_request <= 1;
+                            rw <= 0;
                         end else begin
                             grant_request = 0;
                             data_rd <= data_in;//gets set on next clock cycle
@@ -217,8 +211,7 @@ module core (
                     o_STORE: begin
                             address <= {1'b0,IR[8:0]};
                             state <= 5;
-                        end
-                    //end
+                    end
                 endcase
             end
             5: begin// execute, not all instructions hit this point
