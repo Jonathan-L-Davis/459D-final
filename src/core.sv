@@ -57,6 +57,8 @@ module core (
         .op(alu_op),
         .out(alu_result)
     );
+    
+    assign instr_op = IR[31:26];
 
     always @ (posedge clk) begin
         
@@ -142,12 +144,11 @@ module core (
                 end
             end
             4: begin// decode/execute
-                instr_opcode <= IR[31:26];
-                instr_func <= IR[5:0];
-                
                 case(instr_opcode)
                     //changed logic for alu and register io based on instruction.
                     o_ALU: begin
+                        
+                        reg_rw <= ~reg_rw;
                         rw <= 0;
                         rs <= IR[23:21];
                         rt <= IR[18:16];
@@ -196,7 +197,6 @@ module core (
                         state <= 5;
                     end
                     o_LOAD: begin
-                        reg_rw <= ~reg_rw;
                         data_rd <= data_rd + 1;                        
                         if( grant_given == 0 ) begin
                             address <= {1'b0,IR[8:0]};

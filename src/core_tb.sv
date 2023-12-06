@@ -27,9 +27,9 @@ module core_tb();
         reset = 1;
         #1ps clk = 0;
         #1ps clk = 1;
-        reset = 0;
         
         #1ps clk = 0;
+        reset = 0;
         #1ps clk = 1;
         
         DUT.IR = 32'h80000000;//lb into register 0, should do nothing
