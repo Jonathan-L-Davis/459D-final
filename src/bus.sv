@@ -8,7 +8,7 @@ module bus(
     output bit core0_grant,
     input bit [7:0] core0_data_in,
     output bit [7:0] core0_data_out,
-    input bit core0_address,
+    input bit [8:0] core0_address,
     
     //core 1 interface
     input bit core1_request,
@@ -16,7 +16,7 @@ module bus(
     output bit core1_grant,
     input bit [7:0] core1_data_in,
     output bit [7:0] core1_data_out,
-    input bit core1_address,
+    input bit [8:0] core1_address,
     
     //RAM interface
     output bit [8:0] RAM_address,
