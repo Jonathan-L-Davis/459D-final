@@ -13,7 +13,7 @@ module data_cache(
     output reg grant_request_bus,
     input grant_given_bus,
     input ext_mem_data_out,
-    output reg ext_mem_data_in
+    output reg ext_mem_data_in,
     output reg [8:0] ext_mem_addr,
     output reg ext_mem_rw
 );
@@ -50,7 +50,7 @@ module data_cache(
                         cache_mem[index] <= data_in;
                         // Write-through
                         grant_request_bus <= 1;
-                        ext_mem_address <= address;
+                        ext_mem_addr <= address;
                         ext_mem_data_in <= data_in;
                         ext_mem_rw <= 1;
                         grant_given_core <= grant_given_bus;
@@ -63,7 +63,7 @@ module data_cache(
                     hit <= 0;
                     //miss
                     grant_request_bus <= 1;
-                    ext_mem_address <= address;
+                    ext_mem_addr <= address;
                     if (rw) begin
                         //write
                         cache_mem[index] <= data_in;
