@@ -144,7 +144,7 @@ module core (
                 end
             end
             4: begin// decode/execute
-                case(instr_opcode)
+                case(IR[31:26])
                     //changed logic for alu and register io based on instruction.
                     o_ALU: begin
                         
