@@ -27,10 +27,7 @@ module core (
     bit [31:0] IR;
     
     //instruction formats
-    bit [5:0] instr_opcode,instr_func;
     //added these variables to parse instruction
-    bit [25:0] jump_addr;
-    bit [15:0] immediate_addr;
     
     //ALU controls
     bit [7:0] alu_data1,alu_data2,alu_result;
@@ -38,7 +35,7 @@ module core (
     
     //register file controls
     bit [7:0] data_rs,data_rt,data_rd;
-    bit [4:0] rs,rt,rd;
+    bit [2:0] rs,rt,rd;
     bit reg_rw;
     
     reg_file register_file(
@@ -69,8 +66,6 @@ module core (
             PC = 0;
             IR = 0;
             rw = 0;
-            instr_opcode = 0;
-            instr_func = 0;
             
             //set ALU controls to 0;
             alu_data1 = 0;
@@ -155,7 +150,7 @@ module core (
                         rd <= IR[13:11];
                         alu_data1 <= data_rs;// incorrect until clock cycle happens
                         alu_data2 <= data_rt;
-                        case(instr_func)//set operation and wait until execute cycle to grab the result
+                        case(IR[5:0])//set operation and wait until execute cycle to grab the result
                             f_ADD: begin
                                 alu_op <= 0;
                             end
@@ -178,8 +173,7 @@ module core (
                         state <= 5;
                     end
                     o_JMP: begin
-                        jump_addr <= IR[25:0];
-                        PC <= jump_addr[7:0];
+                        PC <= IR[7:0];
                         state <= 0;
                     end
                     o_JEQ: begin
@@ -191,9 +185,8 @@ module core (
                     end
                     o_ALUI: begin// add immmedidate
                         rs <= IR[23:21];
-                        immediate_addr <= IR[15:0];
                         alu_data1 <= data_rs;
-                        alu_data2 <= immediate_addr[7:0];
+                        alu_data2 <= IR[7:0];
                         state <= 5;
                     end
                     o_LOAD: begin
@@ -215,7 +208,7 @@ module core (
                 endcase
             end
             5: begin// execute, not all instructions hit this point
-                case(instr_opcode)
+                case(IR[31:26])
                     o_ALU,o_JEQ:begin
                         alu_data1 <= data_rs;
                         alu_data2 <= data_rt;
@@ -223,7 +216,7 @@ module core (
                     end
                     o_ALUI: begin
                         alu_data1 <= data_rs;
-                        alu_data2 <= immediate_addr[7:0];
+                        alu_data2 <= IR[7:0];
                         state <= 6;
                     end
                     o_STORE: begin//at least 2 cycles here
@@ -240,7 +233,7 @@ module core (
                 endcase
             end
             6: begin// execute, not all instructions hit this point
-                case(instr_opcode)
+                case(IR[31:26])
                     o_ALU,o_ALUI: begin 
                         data_rd <= alu_result;
                         reg_rw <= 1;
