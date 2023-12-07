@@ -14,9 +14,9 @@ module top(
 reg [3:0] digit3, digit2, digit1, digit0;
 
 //vars for gpiomem
- reg [7:0] data_out_mem, data_in_mem;
- reg [8:0] address_mem;
- reg rw_mem;
+reg [7:0] data_out_mem, data_in_mem;
+reg [8:0] address_mem;
+reg rw_mem;
 
 //vars for core0
 reg grant_given_cpu0, grant_request_cpu0, rw_cpu0;
@@ -39,17 +39,17 @@ display disp(
 );
 
 
- gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
+gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
     .address(address_mem), .data_in(data_in_mem), 
     .data_out(data_out_mem),
     .buttons(buttons),
     .switches(switches),
     .leds(leds),
     .digit3(digit3), .digit2(digit2), .digit1(digit1), .digit0(digit0)    
- );
+);
 
 
- core core0 (
+core core0 (
     .clk(clk_100MHz),.reset(rst),
     .grant_given(grant_given_cpu0), 
     .grant_request(grant_request_cpu0),
@@ -60,7 +60,8 @@ display disp(
     );
 
 
- core core1 (
+
+core core1 (
     .clk(clk_100MHz), .reset(rst),
     .grant_given(grant_given_cpu1), 
     .grant_request(grant_request_cpu1), 
@@ -83,7 +84,7 @@ bus system_bus(
     
     .core1_request(grant_request_cpu1),
     .core1_grant(grant_given_cpu1),
-    .core1_data(data_out_cpu1),
+    .core1_data_in(data_out_cpu1),
     .core1_data_out(data_in_cpu1),
     .core1_address(address_cpu1),
     .core1_rw(rw_cpu1),

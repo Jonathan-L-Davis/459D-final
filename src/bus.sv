@@ -88,6 +88,8 @@ module bus(
     assign core1_data_out = data_out[1];
     assign data_in[0] = core0_data_in;
     assign data_in[1] = core1_data_in;
+    assign addr[0] = core0_address;
+    assign addr[1] = core1_address;
     assign grant_request[0] = core0_request;
     assign grant_request[1] = core1_request;
     assign grant_request_type[0] = core0_rw;

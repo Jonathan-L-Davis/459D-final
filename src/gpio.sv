@@ -1,11 +1,11 @@
 module gpiomem (input clk, input rw_select,
  input [8:0] address, input [7:0] data_in, 
- output [7:0] data_out,
+ output reg [7:0] data_out,
 
  input [3:0] buttons,
  input [15:0] switches,
- output [15:0] leds,
- output [3:0] digit3, digit2, digit1, digit0    
+ output reg [15:0] leds,
+ output reg [3:0] digit3, digit2, digit1, digit0    
  );
     reg [7:0] RAM[511:0];
 

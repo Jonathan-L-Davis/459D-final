@@ -28,7 +28,7 @@ module display(
             case (refresh_counter[19:18]) 
                 2'b00: begin
                     Anode_Activate_disp = 4'b0111; 
-                    LED_BCD = digit4;
+                    LED_BCD = digit3;
                 end
                 2'b01: begin
                     Anode_Activate_disp = 4'b1011; 
