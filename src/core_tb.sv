@@ -42,7 +42,7 @@ module core_tb();
         #1ps clk = 0;
         #1ps clk = 1;
         
-        //grant_given = 1;
+        grant_given = 1;
         data_in = 8'h55;
         state = DUT.state;
         IR = DUT.IR;
