@@ -95,6 +95,7 @@ module core (
         case(state)
             0: begin//fetch - bigendian instructions
                 reg_rw <= 0;//reset reg_write
+                rw <= 0;
                 if( grant_given == 0 ) begin
                     address <= {1'b0,PC};
                     grant_request <= 1;
@@ -185,19 +186,23 @@ module core (
                     end
                     o_ALUI: begin// add immmedidate
                         rs <= IR[23:21];
+                        rt <= IR[18:16];
+                        rd <= IR[13:11];
                         alu_data1 <= data_rs;
                         alu_data2 <= IR[7:0];
                         state <= 5;
                     end
                     o_LOAD: begin
-                        data_rd <= data_rd + 1;                        
+                        data_rd <= data_rd;       ///////                 
                         if( grant_given == 0 ) begin
                             address <= {1'b0,IR[8:0]};
                             grant_request <= 1;
                             rw <= 0;
                         end else begin
+                            reg_rw = 1;
                             grant_request = 0;
                             data_rd <= data_in;//gets set on next clock cycle
+                            rd <= IR[18:16];
                             state <= 0;
                         end
                     end
@@ -222,26 +227,31 @@ module core (
                     o_STORE: begin//at least 2 cycles here
                         if( grant_given == 0 ) begin
                             grant_request <= 1;
-                            data_out <= data_rd;
+                            rw <= 1;
+                            data_out <= data_rt;
                         end else begin
                             grant_request <= 0;
-                            data_rd <= data_in;
-                            reg_rw <= 1;
-                            state <= 5;
+                            state <= 0;
                         end
                     end
                 endcase
             end
             6: begin// execute, not all instructions hit this point
                 case(IR[31:26])
-                    o_ALU,o_ALUI: begin 
+                    o_ALU: begin 
+                        data_rd <= alu_result;
+                        reg_rw <= 1;
+                        state <= 0;
+                    end
+                    o_ALUI: begin 
+                        rd <= rt;
                         data_rd <= alu_result;
                         reg_rw <= 1;
                         state <= 0;
                     end
                     o_JEQ: begin
                         if( alu_result == 0 )
-                            PC = PC + IR[7:0] - 4;
+                            PC = PC + (IR[7:0]<<2) - 4;
                         state <= 0;
                     end
                 endcase

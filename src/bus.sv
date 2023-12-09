@@ -40,28 +40,29 @@ module bus(
     parameter write_state = 1;
     parameter read_request_state = 2;
     parameter read_deliver_state = 3;
-    bit [1:0] state;
+    bit [2:0] state;
     
     always @ ( posedge clk ) begin
         if( reset ) begin
             //reset important control signals, ignore rest
-            core0_grant <= 0;
-            core1_grant <= 0;
+            grant_given[0] <= 0;
+            grant_given[1] <= 0;
             rw <= 0;
             patron <= 0;
         end else begin
             case(state)
             wait_state: begin
+                grant_given[patron] <= 0;
                 if( grant_request[~patron] ) begin//give priority to least recent core
                     patron <= ~patron;
                     case(grant_request_type[~patron])
-                        0: state <= write_state;
-                        1: state <= read_request_state;
+                        1: state <= write_state;
+                        0: state <= read_request_state;
                     endcase
                 end else if(grant_request[patron]) begin
                     case(grant_request_type[patron])
-                        0: state <= write_state;
-                        1: state <= read_request_state;
+                        1: state <= write_state;
+                        0: state <= read_request_state;
                     endcase
                 end
             end
@@ -69,7 +70,8 @@ module bus(
                 RAM_data_in <= data_in[patron];
                 RAM_address <= addr[patron];
                 rw <= 1;
-                state <= wait_state;
+                state <= 7;
+                grant_given[patron] <= 1;
             end
             read_request_state: begin
                 RAM_address <= addr[patron];
@@ -78,7 +80,13 @@ module bus(
             end
             read_deliver_state: begin
                 data_out[patron] <= RAM_data_out;
+                state <= 7;
+                grant_given[patron] <= 1;
+            end
+            default:begin
                 state <= wait_state;
+                rw <= 0;
+                grant_given[patron] <= 0;
             end
             endcase
         end
@@ -94,6 +102,9 @@ module bus(
     assign grant_request[1] = core1_request;
     assign grant_request_type[0] = core0_rw;
     assign grant_request_type[1] = core1_rw;
+    
+    assign core0_grant = grant_given[0];
+    assign core1_grant = grant_given[1];
     
     
 endmodule

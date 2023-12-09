@@ -1,6 +1,6 @@
 module top(
-    input clk_100MHz, 
-    input rst,
+    //input clk_100MHz, 
+    //input rst,
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
     input [3:0] buttons,
@@ -9,7 +9,7 @@ module top(
 );
 
 
-
+bit clk_100MHz,rst;
 //vars for disp
 reg [3:0] digit3, digit2, digit1, digit0;
 
@@ -40,6 +40,7 @@ display disp(
 
 
 gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
+    .reset(rst),
     .address(address_mem), .data_in(data_in_mem), 
     .data_out(data_out_mem),
     .buttons(buttons),
@@ -60,9 +61,13 @@ core core0 (
     );
 
 
+bit [31:0] IR;
+bit [7:0] register[7:1];
+assign register = core0.register_file.file;
+assign IR = core0.IR;
 
 core core1 (
-    .clk(clk_100MHz), .reset(rst),
+    //.clk(clk_100MHz), .reset(rst),
     .grant_given(grant_given_cpu1), 
     .grant_request(grant_request_cpu1), 
     .rw(rw_cpu1),
@@ -95,5 +100,33 @@ bus system_bus(
     .rw(rw_mem)    
 );
 
+bit [2:0] bus_state;
+
+assign bus_state = system_bus.state;
+
+    initial begin
+    
+    
+        rst = 1;
+        
+        clk_100MHz = 0;
+        #1ps;
+        clk_100MHz = 1;
+        #1ps;
+        
+        rst = 0;
+        
+        
+        mem_gpio.RAM[504] = 4;
+        mem_gpio.RAM[503] = 1;
+        
+        for(int i = 0; i < 4096; i++) begin
+            clk_100MHz = 0;
+            #1ps;
+            clk_100MHz = 1;
+            #1ps;
+        end
+        
+    end
 
 endmodule
