@@ -9,8 +9,9 @@ module reg_file (
     always @(posedge clk)begin
         
         if(reset) begin
-            for( int i = 1; i < 8; i++ )
+            for( int i = 1; i < 8; i++ ) begin
                 file[i] = 0;
+            end
         end else begin
             
             if( RD && rw )begin

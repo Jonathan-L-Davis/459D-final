@@ -1,12 +1,12 @@
 `timescale 1ns/1ps
 
-module top(
+module top(//*
     input clk_100MHz, 
     input rst,
+    input [3:0] buttons,
+    input [15:0] switches,//*/
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
-    input [3:0] buttons,
-    input [15:0] switches,
     output [15:0] leds       
 );
 

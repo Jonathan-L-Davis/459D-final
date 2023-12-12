@@ -10,19 +10,19 @@ module core
     output bit [8:0] address//upper bit is flag for gpio
     );
     
-    parameter o_ALU   =  0;
-    parameter o_JMP   =  2;
-    parameter o_JEQ   =  4;
-    parameter o_ALUI  =  8;
-    parameter o_LOAD  = 32;
-    parameter o_STORE = 40;
+    localparam o_ALU   =  0;
+    localparam o_JMP   =  2;
+    localparam o_JEQ   =  4;
+    localparam o_ALUI  =  8;
+    localparam o_LOAD  = 32;
+    localparam o_STORE = 40;
     
-    parameter f_ADD = 32;
-    parameter f_SUB = 34;
-    parameter f_AND = 36;
-    parameter f_OR  = 37;
-    parameter f_XOR = 38;
-    parameter f_SLT = 42;
+    localparam f_ADD = 32;
+    localparam f_SUB = 34;
+    localparam f_AND = 36;
+    localparam f_OR  = 37;
+    localparam f_XOR = 38;
+    localparam f_SLT = 42;
     
     //cpu internal state
     bit [3:0] state;
