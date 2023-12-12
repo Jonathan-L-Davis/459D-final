@@ -4,7 +4,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports clk_100MHz]
 set_property PACKAGE_PIN U18 [get_ports rst]
 set_property IOSTANDARD LVCMOS33 [get_ports rst]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets rst]
-#create_clock -period 10.000 [get_ports clk_100MHz]  # Adjust the period according to your clock frequency
+create_clock -name txclk -period 10 [get_ports clk_100MHz]  # Adjust the period according to your clock frequency
 
 #seven-segment LED display
 set_property PACKAGE_PIN W7 [get_ports {LED_out[6]}]

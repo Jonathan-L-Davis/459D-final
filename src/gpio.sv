@@ -8,7 +8,7 @@ module gpiomem (input clk, input reset, input rw_select,
  output reg [3:0] digit3, digit2, digit1, digit0    
  );
     reg [7:0] RAM[511:0];
-
+    reg [7:0] out_buf;
     //buttons,//503{3:0}
     //switches//504-505
     //leds,   //506-507
@@ -20,13 +20,15 @@ module gpiomem (input clk, input reset, input rw_select,
     //read only
     //503, 504, 505, 
 
-    //assign data_out = RAM[address];
+    assign data_out = out_buf;
     
-    always @(*) begin
+    always @(posedge clk) begin
     
     if( reset )begin
         $readmemh("fib_test.dat", RAM);
+        out_buf <= 0;
     end else begin
+        out_buf <= RAM[address];
         if(rw_select == 1) begin // Write operation
             if((address != 503)||(address != 504)||(address != 505)) begin
                 RAM[address] <= data_in;
@@ -34,7 +36,7 @@ module gpiomem (input clk, input reset, input rw_select,
         end else begin
             //data_out <= RAM[address];
         end
-        data_out <= RAM[address];
+        //out_buf <= RAM[address];
         //*
 
         //buttons,//503{4:0}

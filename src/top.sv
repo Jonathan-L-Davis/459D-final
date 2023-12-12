@@ -16,6 +16,18 @@ module top(//*
 );
 
 `ifdef SIM
+
+reg [32:0] cnt;
+
+always@( posedge clk_100MHz) begin
+    cnt <= cnt + 1;
+    if(cnt == 100000000)begin
+        cnt = 0;
+        //leds[15] = ~leds[15];
+    end
+        
+end
+
 //*
 bit [3:0] buttons;
 bit [15:0] switches;
@@ -57,7 +69,7 @@ gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
     .data_out(data_out_mem),
     .buttons(buttons),
     .switches(switches),
-    .leds(leds),
+    .leds(leds[14:0]),
     .digit3(digit3), .digit2(digit2), .digit1(digit1), .digit0(digit0)    
 );
 
@@ -121,7 +133,7 @@ bus system_bus(
         #1ps;
         clk_100MHz = 0;
         rst = 0;
-        buttons = 1;
+        buttons = 0;
         switches = 4;
         
         for(int i = 0; i < 1000000; i++) begin
