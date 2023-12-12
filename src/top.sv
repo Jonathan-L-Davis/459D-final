@@ -1,19 +1,27 @@
 `timescale 1ns/1ps
 
+`define SIM
+
+
 module top(//*
+`ifndef SIM
     input clk_100MHz, 
     input rst,
     input [3:0] buttons,
     input [15:0] switches,//*/
+`endif
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
     output [15:0] leds       
 );
 
-/*
+`ifdef SIM
+//*
 bit [3:0] buttons;
 bit [15:0] switches;
 bit clk_100MHz,rst;//*/
+`endif
+
 //vars for disp
 reg [3:0] digit3, digit2, digit1, digit0;
 
@@ -102,8 +110,8 @@ bus system_bus(
     always @(negedge rst) begin
         core1.PC <= 4;
     end//*/
-    
-    /* //only for simulating programs
+`ifdef SIM
+    //* //only for simulating programs
     initial begin
         
         clk_100MHz = 0;
@@ -124,5 +132,5 @@ bus system_bus(
         end
         
     end//*/
-
+`endif
 endmodule

@@ -22,7 +22,7 @@ module gpiomem (input clk, input reset, input rw_select,
 
     //assign data_out = RAM[address];
     
-    always @(posedge clk or posedge address or negedge address) begin
+    always @(*) begin
     
     if( reset )begin
         $readmemh("fib_test.dat", RAM);
