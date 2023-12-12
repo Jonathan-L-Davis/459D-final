@@ -20,8 +20,10 @@ module gpiomem (input clk, input reset, input rw_select,
     //read only
     //503, 504, 505, 
 
-    always @(posedge clk) begin
-    assign data_out = RAM[address];
+    //assign data_out = RAM[address];
+    
+    always @(*) begin
+    
     if( reset )begin
         $readmemh("fib_test.dat", RAM);
     end else begin
@@ -32,7 +34,7 @@ module gpiomem (input clk, input reset, input rw_select,
         end else begin
             //data_out <= RAM[address];
         end
-        
+        data_out <= RAM[address];
         //*
 
         //buttons,//503{4:0}

@@ -1,19 +1,19 @@
 `timescale 1ns/1ps
 
 module top(
-    //input clk_100MHz, 
+    input clk_100MHz, 
     input rst,
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
-    //input [3:0] buttons,
-    //input [15:0] switches,
+    input [3:0] buttons,
+    input [15:0] switches,
     output [15:0] leds       
 );
 
-
+/*
 bit [3:0] buttons;
 bit [15:0] switches;
-bit clk_100MHz,rst;
+bit clk_100MHz,rst;//*/
 //vars for disp
 reg [3:0] digit3, digit2, digit1, digit0;
 
@@ -103,7 +103,7 @@ bus system_bus(
         core1.PC <= 4;
     end//*/
     
-    //* //only for simulating programs
+    /* //only for simulating programs
     initial begin
         
         clk_100MHz = 0;
