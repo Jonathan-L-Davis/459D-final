@@ -1,4 +1,8 @@
-module core (
+module core
+    #(
+        parameter pc_start = 0
+    )
+    (
     input bit clk, input bit reset,
     input bit grant_given, 
     output bit grant_request, output bit rw,
@@ -63,7 +67,7 @@ module core (
             
             //wipe core internal state
             state = 0;
-            PC = 0;
+            PC = pc_start;
             IR = 0;
             rw = 0;
             
@@ -144,13 +148,10 @@ module core (
                     //changed logic for alu and register io based on instruction.
                     o_ALU: begin
                         
-                        reg_rw <= ~reg_rw;
                         rw <= 0;
                         rs <= IR[23:21];
                         rt <= IR[18:16];
                         rd <= IR[13:11];
-                        alu_data1 <= data_rs;// incorrect until clock cycle happens
-                        alu_data2 <= data_rt;
                         case(IR[5:0])//set operation and wait until execute cycle to grab the result
                             f_ADD: begin
                                 alu_op <= 0;
@@ -173,7 +174,7 @@ module core (
                         endcase
                         state <= 5;
                     end
-                    o_JMP: begin
+                    2: begin
                         PC <= IR[7:0];
                         state <= 0;
                     end
@@ -181,6 +182,7 @@ module core (
                         //need to add logic somewhere for comparison. 
                         rs <= IR[23:21];
                         rt <= IR[18:16];
+                        rd <= 0;
                         alu_op = 5;//xor, if 0 they are equal
                         state <= 5;
                     end
@@ -214,7 +216,12 @@ module core (
             end
             5: begin// execute, not all instructions hit this point
                 case(IR[31:26])
-                    o_ALU,o_JEQ:begin
+                    o_ALU:begin
+                        alu_data1 <= data_rs;
+                        alu_data2 <= data_rt;
+                        state <= 6;
+                    end
+                    o_JEQ:begin
                         alu_data1 <= data_rs;
                         alu_data2 <= data_rt;
                         state <= 6;
@@ -243,7 +250,7 @@ module core (
                         reg_rw <= 1;
                         state <= 0;
                     end
-                    o_ALUI: begin 
+                    o_ALUI: begin
                         rd <= rt;
                         data_rd <= alu_result;
                         reg_rw <= 1;
@@ -251,7 +258,7 @@ module core (
                     end
                     o_JEQ: begin
                         if( alu_result == 0 )
-                            PC = PC + (IR[7:0]<<2) - 4;
+                            PC = PC + (IR[7:0]) - 4;
                         state <= 0;
                     end
                 endcase
