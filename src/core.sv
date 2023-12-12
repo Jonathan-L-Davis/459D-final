@@ -213,6 +213,7 @@ module core
                     o_STORE: begin
                             address <= {1'b0,IR[8:0]};
                             state <= 5;
+                            rt <= IR[18:16];
                     end
                 endcase
             end

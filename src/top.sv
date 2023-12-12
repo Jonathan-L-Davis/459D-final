@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-`define SIM
+//`define SIM
 
 
 module top(//*
