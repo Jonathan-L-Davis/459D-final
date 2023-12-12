@@ -20,17 +20,20 @@ module gpiomem (input clk, input reset, input rw_select,
     //read only
     //503, 504, 505, 
 
-assign data_out = RAM[address];
     always @(posedge clk) begin
+    assign data_out = RAM[address];
+    if( reset )begin
+        $readmemh("fib_test.dat", RAM);
+    end else begin
         if(rw_select == 1) begin // Write operation
             if((address != 503)||(address != 504)||(address != 505)) begin
                 RAM[address] <= data_in;
             end
-        end/* else begin
-            data_out <= RAM[address];
-        end//*/
+        end else begin
+            //data_out <= RAM[address];
+        end
         
-        /*
+        //*
 
         //buttons,//503{4:0}
         RAM[503] <= {4'b0000, buttons};
@@ -42,19 +45,13 @@ assign data_out = RAM[address];
         //leds,   //506-507
         leds <= {RAM[507], RAM[506]};
         //*/
+        
+        digit3 <= RAM[511];
+        digit2 <= RAM[510];
+        digit1 <= RAM[509];
+        digit0 <= RAM[508];
+    end
     end
     
-    assign digit3 = RAM[511];
-    assign digit2 = RAM[510];
-    assign digit1 = RAM[509];
-    assign digit0 = RAM[508];
-
-    initial begin
-        $readmemh("fib_test.dat", RAM);
-    end
-    
-    always @ ( posedge reset ) begin
-        $readmemh("fib_test.dat", RAM);
-    end
     
 endmodule

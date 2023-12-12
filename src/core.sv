@@ -185,6 +185,8 @@ module core
                         rd <= 0;
                         alu_op = 5;//xor, if 0 they are equal
                         state <= 5;
+                        alu_data1 <= data_rs;
+                        alu_data2 <= data_rt;
                     end
                     o_ALUI: begin// add immmedidate
                         rs <= IR[23:21];
@@ -258,7 +260,7 @@ module core
                     end
                     o_JEQ: begin
                         if( alu_result == 0 )
-                            PC = PC + (IR[7:0]) - 4;
+                            PC <= PC + (IR[7:0]) - 4;
                         state <= 0;
                     end
                 endcase

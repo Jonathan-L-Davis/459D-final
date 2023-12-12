@@ -19,7 +19,7 @@ module reg_file (
                 file[RD] <= RD_data;
             end else begin
                 
-                //*
+                /*
                 if( RS )begin
                     RS_data <= file[RS];
                 end else begin
@@ -37,6 +37,19 @@ module reg_file (
         end
     end
     
+    always @ (*) begin
+        if( RS )begin
+            RS_data <= file[RS];
+        end else begin
+            RS_data <= 0;
+        end
+        
+        if( RT )begin
+            RT_data <= file[RT];
+        end else begin
+            RT_data <= 0;
+        end
+    end
     //assign RS_data = file[RS];
     //assign RT_data = file[RT];
     
