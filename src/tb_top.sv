@@ -27,7 +27,7 @@ class RandInstructions;
     //distribution of store instructions based on if it is itype
     constraint c_itype_store {
         if (instruction_type == ITYPE) {
-            is_store_instruction dist {1'b1 :/ 4, 1'b0 :/ 6}; // Store instruction 40%, , others are 60%
+            is_store_instruction dist {1'b1 :/ 4, 1'b0 :/ 6}; // store 40%, , others are 60%
         }
     }
 
@@ -52,7 +52,7 @@ class RandInstructions;
         if (instruction_type == RTYPE){
            (funct == 6'b100000) || (funct == 6'b100010) || (funct == 6'b100100) || (funct == 6'b100101) || (funct == 6'b101010);
         }else{
-            funct <= 6'b100000;
+            funct == 6'b100000;
         }
     }
     constraint c_rsrt{
@@ -114,7 +114,7 @@ class instruction_transitions;
     covergroup opcodes;
         option.per_instance = 1;
 
-        inst_reg_opcodes: coverpoint (core_id == 0 ? inst_top.core0.IR : inst_top.core1.IR) {
+        inst_reg_opcodes: coverpoint (core_id == 0 ? mips_inst.core0.IR : mips_inst.core1.IR) {
         //coverpoint current_inst {
             bins add = {32'b000000????????????????????100000};
             bins sub = {32'b000000????????????????????100010};
@@ -130,39 +130,35 @@ class instruction_transitions;
             bins j = {32'b000010??????????????????????????????};
         }
 
-        last_inst_cp: coverpoint last_inst; // New coverpoint (core_id == 0 ? last_inst_core0 : last_inst_core1)
-        curr_inst_cp: coverpoint curr_inst; // New coverpoint
-        // last_inst_cp: coverpoint (core_id == 0 ? last_inst_core0 : last_inst_core1); // New coverpoint (core_id == 0 ? last_inst_core0 : last_inst_core1)
-        // curr_inst_cp: coverpoint (core_id == 0 ? curr_inst_core0 : curr_inst_core1); // New coverpoint
+        last_inst_cp: coverpoint last_inst; 
+        curr_inst_cp: coverpoint curr_inst; 
 
         cross_inst: cross last_inst_cp, curr_inst_cp; // Updated cross
     endgroup
 
     function sample();
-        opcodes.sample(); // Corrected call to sample
+        opcodes.sample();
     endfunction
 endclass
 
-module tb_top (); /* this is automatically generated */
 
+
+
+
+
+module tb_top (); 
     RandTransactions Transactions;
     int file;
-    // (*NOTE*) replace reset, clock, others
-    logic        clk_100MHz;
-    logic        rst;
+    reg        clk_100MHz;
+    reg        rst;
     logic  [3:0] Anode_Activate;
     logic  [6:0] LED_out;
-    logic  [3:0] buttons;
-    logic [15:0] switches;
+    reg  [3:0] buttons = 0;
+    reg [15:0] switches = 0;
     logic [15:0] leds;
-    // clock
-    
-
-    instruction_transitions core0_instr_cov = new(0);
-    instruction_transitions core1_instr_cov = new(1);
 
 
-//generate random instructions and write them to memory in big endian format
+//generate random instructions and write them to memory
     initial begin
         file = $fopen("testbenchmem.dat", "w");
 
@@ -185,21 +181,15 @@ module tb_top (); /* this is automatically generated */
 
     
     initial begin
-        clk_100MHz = '0;
-        forever #(0.5) clk_100MHz = ~clk_100MHz;
+        clk_100MHz <= '0;
+        forever #(0.5) clk_100MHz <= ~clk_100MHz;
     end
 
-    // synchronous reset
-    logic srstb;
-    initial begin
-        rst <= '1;
-        repeat(10)@(posedge clk_100MHz);
-        rst <= '0;
-    end
+  
 
     
 
-    top inst_top
+    mips mips_inst
         (
             .clk_100MHz     (clk_100MHz),
             .rst            (rst),
@@ -210,51 +200,56 @@ module tb_top (); /* this is automatically generated */
             .leds           (leds)
         );
 
-
-
-    
-    always @(posedge clk_100MHz) begin
-        if (inst_top.core0.state == 4) begin
-            core0_instr_cov.curr_inst = inst_top.core0.IR;
-            core0_instr_cov.sample();
-            core0_instr_cov.last_inst = inst_top.core0.IR;
-        end
-        if (inst_top.core1.state == 4) begin
-            core1_instr_cov.curr_inst = inst_top.core1.IR;
-            core1_instr_cov.sample();
-            core1_instr_cov.last_inst = inst_top.core1.IR;
-        end
+      // synchronous reset
+    logic srstb;
+    initial begin
+        rst <= '1;
+        repeat(10)@(posedge clk_100MHz);
+        rst <= '0;
     end
 
 
+     instruction_transitions core0_instr_cov = new(0);
+    instruction_transitions core1_instr_cov = new(1);
+    always @(posedge clk_100MHz) begin
+        if (mips_inst.core0.state == 4) begin
+            core0_instr_cov.curr_inst = mips_inst.core0.IR;
+            core0_instr_cov.sample();
+            core0_instr_cov.last_inst = mips_inst.core0.IR;
+        end
+        if (mips_inst.core1.state == 4) begin
+            core1_instr_cov.curr_inst = mips_inst.core1.IR;
+            core1_instr_cov.sample();
+            core1_instr_cov.last_inst = mips_inst.core1.IR;
+        end
+    end
 
+    task init();
+        buttons    <= '0;
+        switches   <= '0;
+    endtask
 
-    // task init();
-    //     buttons    <= '0;
-    //     switches   <= '0;
-    // endtask
-
-    // task drive(int iter);
-    //     for(int it = 0; it < iter; it++) begin
-    //         buttons    <= '0;
-    //         switches   <= '0;
-    //         @(posedge clk);
-    //     end
-    // endtask
+    task drive(int iter);
+        for(int it = 0; it < iter; it++) begin
+            buttons    <= '0;
+            switches   <= '0;
+            @(posedge clk);
+        end
+    endtask
 
     
 
-    // initial begin
-    //     // do something
+    initial begin
+        // do something
 
-    //     init();
-    //     repeat(10)@(posedge clk);
+        init();
+        repeat(10)@(posedge clk);
 
-    //     drive(20);
+        drive(20);
 
-    //     repeat(10)@(posedge clk);
-    //     $finish;
-    // end
+        repeat(10)@(posedge clk);
+        $finish;
+    end
     // // dump wave
     // initial begin
     //     $display("random seed : %0d", $unsigned($get_initial_random_seed()));
