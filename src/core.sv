@@ -174,7 +174,7 @@ module core
                         endcase
                         state <= 5;
                     end
-                    2: begin
+                    o_JMP: begin
                         PC <= IR[7:0];
                         state <= 0;
                     end

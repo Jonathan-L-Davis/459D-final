@@ -15,7 +15,24 @@ module top(//*
     output [15:0] leds       
 );
 
+
+
+`ifndef SIM
+reg [32:0] cnt1;
+reg clk1 = 0;
+
+//*
+always@( posedge clk_100MHz) begin
+    cnt1 <= cnt1 + 1;
+    if(cnt1 == 10000)begin
+        cnt1 <= 0;
+        clk1 <= ~clk1;
+    end
+    
+end
+`endif//*/
 `ifdef SIM
+
 //*
 bit [3:0] buttons;
 bit [15:0] switches;
@@ -51,7 +68,13 @@ display disp(
 );
 
 
-gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
+gpiomem mem_gpio (
+`ifdef SIM
+    .clk(clk_100MHz),
+`else
+    .clk(clk_100MHz),
+`endif
+    .rw_select(rw_mem),
     .reset(rst),
     .address(address_mem), .data_in(data_in_mem), 
     .data_out(data_out_mem),
@@ -63,7 +86,12 @@ gpiomem mem_gpio (.clk(clk_100MHz),.rw_select(rw_mem),
 
 
 core #(.pc_start(0)) core0 (
-    .clk(clk_100MHz),.reset(rst),
+`ifdef SIM
+    .clk(clk_100MHz),
+`else
+    .clk(clk_100MHz),
+`endif
+    .reset(rst),
     .grant_given(grant_given_cpu0), 
     .grant_request(grant_request_cpu0),
     .rw(rw_cpu0),
@@ -73,7 +101,12 @@ core #(.pc_start(0)) core0 (
     );
 
 core #(.pc_start(4)) core1 (
-    .clk(clk_100MHz), .reset(rst),
+`ifdef SIM
+    .clk(clk_100MHz),
+`else
+    .clk(clk_100MHz),
+`endif
+ .reset(rst),
     .grant_given(grant_given_cpu1), 
     .grant_request(grant_request_cpu1), 
     .rw(rw_cpu1),
@@ -83,7 +116,11 @@ core #(.pc_start(4)) core1 (
     );
 
 bus system_bus(
+`ifdef SIM
     .clk(clk_100MHz),
+`else
+    .clk(clk_100MHz),
+`endif
     .reset(rst),
 
     .core0_request(grant_request_cpu0),

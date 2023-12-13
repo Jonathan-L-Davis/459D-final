@@ -14,8 +14,8 @@ assign selReg[1] = reg_2;
 
 assign res[0] = selReg[0]+selReg[1];
 assign res[1] = selReg[0]-selReg[1];
-assign res[2] = selReg[0]|selReg[1];
-assign res[3] = selReg[0]&selReg[1];
+assign res[2] = selReg[0]&selReg[1];
+assign res[3] = selReg[0]|selReg[1];
 assign res[4] = selReg[0]<selReg[1];
 assign res[5] = selReg[0]^selReg[1];
 assign res[6] = 0;
