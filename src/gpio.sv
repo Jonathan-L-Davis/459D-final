@@ -22,19 +22,24 @@ module gpiomem (input clk, input reset, input rw_select,
 
     assign data_out = out_buf;
     
-    always @(posedge clk) begin
+    always @(negedge clk) begin
     
     if( reset )begin
         $readmemh("fib_test.dat", RAM);
-        out_buf <= 0;
     end else begin
-        out_buf <= RAM[address];
+        //data_out <= RAM[address];
         if(rw_select == 1) begin // Write operation
             if((address != 503)||(address != 504)||(address != 505)) begin
                 RAM[address] <= data_in;
             end
+            /* / memory persistence
+            for(int i = 1; i < 512; i++) begin
+                RAM[address+i] <= RAM[address+i];
+            end//*/
         end else begin
+            RAM <= RAM;
             //data_out <= RAM[address];
+            out_buf <= RAM[address];
         end
         //out_buf <= RAM[address];
         //*
