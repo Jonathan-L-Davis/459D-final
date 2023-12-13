@@ -1,15 +1,11 @@
 `timescale 1ns/1ps
 
-//`define SIM
 
-
-module mips(//*
-`ifndef SIM
+module mips(
     input clk_100MHz, 
     input rst,
     input [3:0] buttons,
-    input [15:0] switches,//*/
-`endif
+    input [15:0] switches,
     output [3:0] Anode_Activate,
     output [6:0] LED_out,
     output [15:0] leds       
@@ -17,7 +13,6 @@ module mips(//*
 
 
 
-`ifndef SIM
 reg [32:0] cnt1;
 reg clk1 = 0;
 
@@ -28,16 +23,12 @@ always@( posedge clk_100MHz) begin
         cnt1 <= 0;
         clk1 <= ~clk1;
     end
-    
 end
-`endif//*/
-`ifdef SIM
 
 //*
 bit [3:0] buttons;
 bit [15:0] switches;
 bit clk_100MHz,rst;//*/
-`endif
 
 //vars for disp
 reg [3:0] digit3, digit2, digit1, digit0;
@@ -69,11 +60,7 @@ display disp(
 
 
 gpiomem mem_gpio (
-`ifdef SIM
     .clk(clk_100MHz),
-`else
-    .clk(clk1),
-`endif
     .rw_select(rw_mem),
     .reset(rst),
     .address(address_mem), .data_in(data_in_mem), 
@@ -86,11 +73,7 @@ gpiomem mem_gpio (
 
 
 core #(.pc_start(0)) core0 (
-`ifdef SIM
     .clk(clk_100MHz),
-`else
-    .clk(clk1),
-`endif
     .reset(rst),
     .grant_given(grant_given_cpu0), 
     .grant_request(grant_request_cpu0),
@@ -101,12 +84,8 @@ core #(.pc_start(0)) core0 (
     );
 
 core #(.pc_start(4)) core1 (
-`ifdef SIM
     .clk(clk_100MHz),
-`else
-    .clk(clk1),
-`endif
- .reset(rst),
+    .reset(rst),
     .grant_given(grant_given_cpu1), 
     .grant_request(grant_request_cpu1), 
     .rw(rw_cpu1),
@@ -116,11 +95,7 @@ core #(.pc_start(4)) core1 (
     );
 
 bus system_bus(
-`ifdef SIM
     .clk(clk_100MHz),
-`else
-    .clk(clk1),
-`endif
     .reset(rst),
 
     .core0_request(grant_request_cpu0),
@@ -142,32 +117,4 @@ bus system_bus(
     .RAM_data_out(data_out_mem),
     .rw(rw_mem)    
 );
-
-    /*
-    always @(negedge rst) begin
-        core1.PC <= 4;
-    end//*/
-`ifdef SIM
-    //* //only for simulating programs
-    initial begin
-        
-        clk_100MHz = 0;
-        rst = 1;
-        #1ps;
-        clk_100MHz = 1;
-        #1ps;
-        clk_100MHz = 0;
-        rst = 0;
-        buttons = 1;
-        switches = 4;
-        
-        for(int i = 0; i < 1000000; i++) begin
-            #1ps;
-            clk_100MHz = 1;
-            #1ps;
-            clk_100MHz = 0;
-        end
-        
-    end//*/
-`endif
 endmodule
