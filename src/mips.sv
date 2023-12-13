@@ -3,7 +3,7 @@
 //`define SIM
 
 
-module top(//*
+module mips(//*
 `ifndef SIM
     input clk_100MHz, 
     input rst,
