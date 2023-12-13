@@ -142,15 +142,23 @@ module tb_top ();
 
 
     initial begin
+        Transactions = new();
         clk_100MHz <= '0;
         forever #(1) clk_100MHz <= ~clk_100MHz;
+
+
+        
     end
+
+    
+    
+    int counterMax = 1_000_000;
+    int loopMax = 4;
 
     int counter = 0;
     int iteration = 0;
-    int loops;
-    int counterMax = 1_000;
-    int loopMax = 5;
+    int loops = 0;
+    
     always @(posedge  clk_100MHz) begin
          counter = counter + 1;
          if(counter == counterMax) begin
@@ -162,17 +170,22 @@ module tb_top ();
             iteration = 0;
         end
 
+        if(loops >= loopMax) begin
+            $finish;
+        end
+
         if (iteration) begin
+           
             file = $fopen("testbench.dat", "w");
 
             if (file == 0) begin
                 $display("Error: File could not be opened.");
                 $finish;
             end
-
-            Transactions = new();
             assert(Transactions.randomize()) else $fatal("Randomization failed");
-            foreach (Transactions.trans_array[i]) begin  
+            $display("randomized");
+            foreach (Transactions.trans_array[i]) begin
+                $display("wrote instruction %d", i);  
                 $fwrite(file, "%h\n", Transactions.trans_array[i].instruction[31:24]); 
                 $fwrite(file, "%h\n", Transactions.trans_array[i].instruction[23:16]);
                 $fwrite(file, "%h\n", Transactions.trans_array[i].instruction[15:8]);
@@ -185,12 +198,11 @@ module tb_top ();
             repeat(2)@(posedge clk_100MHz);
             rst <= '0;
             iteration = 0;
-            $display("reset");
+            $display("it done been randomized");
+            
         end
 
-        if(loops >= loopMax) begin
-            $finish;
-        end
+        
     end
 
     gpiomem mem_gpio (
