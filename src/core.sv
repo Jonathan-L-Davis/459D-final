@@ -23,6 +23,8 @@ module core
     localparam f_OR  = 37;
     localparam f_XOR = 38;
     localparam f_SLT = 42;
+    localparam f_SHIFT_LEFT = 4;
+    localparam f_SHIFT_RIGHT = 7;
     
     //cpu internal state
     bit [3:0] state;
@@ -170,6 +172,12 @@ module core
                             end
                             f_XOR: begin
                                 alu_op <= 5;
+                            end
+                            f_SHIFT_LEFT: begin
+                                alu_op <= 6;
+                            end
+                            f_SHIFT_RIGHT: begin
+                                alu_op <= 7;
                             end
                         endcase
                         state <= 5;

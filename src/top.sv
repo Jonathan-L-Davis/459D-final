@@ -24,7 +24,7 @@ reg clk1 = 0;
 //*
 always@( posedge clk_100MHz) begin
     cnt1 <= cnt1 + 1;
-    if(cnt1 == 10000)begin
+    if(cnt1 == 5000)begin
         cnt1 <= 0;
         clk1 <= ~clk1;
     end
@@ -72,7 +72,7 @@ gpiomem mem_gpio (
 `ifdef SIM
     .clk(clk_100MHz),
 `else
-    .clk(clk_100MHz),
+    .clk(clk1),
 `endif
     .rw_select(rw_mem),
     .reset(rst),
@@ -89,7 +89,7 @@ core #(.pc_start(0)) core0 (
 `ifdef SIM
     .clk(clk_100MHz),
 `else
-    .clk(clk_100MHz),
+    .clk(clk1),
 `endif
     .reset(rst),
     .grant_given(grant_given_cpu0), 
@@ -104,7 +104,7 @@ core #(.pc_start(4)) core1 (
 `ifdef SIM
     .clk(clk_100MHz),
 `else
-    .clk(clk_100MHz),
+    .clk(clk1),
 `endif
  .reset(rst),
     .grant_given(grant_given_cpu1), 
@@ -119,7 +119,7 @@ bus system_bus(
 `ifdef SIM
     .clk(clk_100MHz),
 `else
-    .clk(clk_100MHz),
+    .clk(clk1),
 `endif
     .reset(rst),
 
