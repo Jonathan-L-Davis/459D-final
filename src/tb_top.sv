@@ -10,21 +10,28 @@ class RandInstructions;
     bit [4:0] shamt = 5'b00000;
     int instruction_number;
     rand bit is_store_instruction;
+    rand bit is_beq_instruction
 
 
     //distribution of the instruction types
     constraint c_instruction_type {
         instruction_type dist { 
             RTYPE := 5,
-            ITYPE := 3,   // ITYPE has a 30% chance
-            JTYPE := 2 
+            ITYPE := 5,   // ITYPE has a 50% chance
+            JTYPE := 0 
         };
     }
 
     //distribution of store instructions based on if it is itype
     constraint c_itype_store {
         if (instruction_type == ITYPE) {
-            is_store_instruction dist {1'b1 :/ 4, 1'b0 :/ 6}; // store 40%, , others are 60%
+            is_store_instruction dist {1'b1 :/ 2.5, 1'b0 :/ 7.5}; // store 25%, , others are 75%
+        }
+    }
+
+    constraint c_itype_beq {
+        if (instruction_type == ITYPE) {
+            is_beq_instruction dist {1'b1 :/ 0, 1'b0 :/ 10}; // beq 0%, , others are 100%
         }
     }
 
@@ -34,8 +41,10 @@ class RandInstructions;
         } else if (instruction_type == ITYPE) {
             if (is_store_instruction) {
                 opcode == 6'b101000;
-            } else {
-                (opcode == 6'b000100) || (opcode == 6'b001000) || (opcode == 6'b100000);
+            } else if (is_beq_instruction){
+                opcode == 6'b000100;
+            } else{
+                (opcode == 6'b001000) || (opcode == 6'b100000);
             }
         } else if (instruction_type == JTYPE) {
             opcode == 6'b000010;
@@ -55,16 +64,16 @@ class RandInstructions;
 
     constraint c_rsrt{
             if(instruction_type == RTYPE){ 
-                rs inside {[5'b00000:5'b11111]};
-                rt inside {[5'b00000:5'b11111]};
-                rd inside {[5'b00000:5'b11111]};
+                rs inside {[5'b00000:5'b00111]};
+                rt inside {[5'b00000:5'b00111]};
+                rd inside {[5'b00000:5'b00111]};
             }else if(instruction_type == ITYPE){ 
-                rs inside {[5'b00000:5'b11111]};
-                rt inside {[5'b00000:5'b11111]};
+                rs inside {[5'b00000:5'b00111]};
+                rt inside {[5'b00000:5'b00111]};
             }else{ 
-                rs inside {[5'b00000:5'b11111]};
-                rt inside {[5'b00000:5'b11111]};
-                rd inside {[5'b00000:5'b11111]};
+                rs inside {[5'b00000:5'b00111]};
+                rt inside {[5'b00000:5'b00111]};
+                rd inside {[5'b00000:5'b00111]};
             }
     }
 
