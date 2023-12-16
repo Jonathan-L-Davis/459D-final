@@ -10,7 +10,7 @@ class RandInstructions;
     bit [4:0] shamt = 5'b00000;
     int instruction_number;
     rand bit is_store_instruction;
-    rand bit is_beq_instruction
+    rand bit is_beq_instruction;
 
 
     //distribution of the instruction types
@@ -25,7 +25,7 @@ class RandInstructions;
     //distribution of store instructions based on if it is itype
     constraint c_itype_store {
         if (instruction_type == ITYPE) {
-            is_store_instruction dist {1'b1 :/ 2.5, 1'b0 :/ 7.5}; // store 25%, , others are 75%
+            is_store_instruction dist {1'b1 :/ 25, 1'b0 :/ 75}; // store 25%, , others are 75%
         }
     }
 
@@ -80,7 +80,7 @@ class RandInstructions;
     constraint c_immediate{
         if (instruction_type == ITYPE){
             if((instruction_number >=0 || instruction_number <=31) && is_store_instruction){
-                immediate_addr inside {[16'h0000:16'hFFFF]};
+                immediate_addr inside {[16'h0000:16'h01FF]};
             }
         }else{
             immediate_addr == 16'h0000;
@@ -89,7 +89,7 @@ class RandInstructions;
 
     constraint c_address{
         if (instruction_type == JTYPE){
-            address inside {[26'b00_0000_0000_0000_0000_0000_0000:26'b11_1111_1111_1111_1111_1111_1111]};
+            address inside {[26'b00_0000_0000_0000_0000_0000_0000:26'b00_0000_00000_0000_0001_1111_1111]};
         }else{
             immediate_addr == 26'b00_0000_0000_0000_0000_0000_0000;
         }
@@ -185,7 +185,7 @@ module tb_top ();
     
     
     int counterMax = 1_000_000;
-    int loopMax = 2;
+    int loopMax = 5;
 
     int counter = 0;
     int iteration = 0;
@@ -322,7 +322,7 @@ module tb_top ();
         if (core0.state == 4) begin
             curr_inst = core0.IR;
             core0_cov.sample();
-            $display("sample");
+            //$display("sample");
             $display("%t: Covergroup total coverage is %f", $time, core0_cov.get_coverage());
             last_inst = core0.IR;
         end
