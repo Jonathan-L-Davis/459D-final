@@ -12,6 +12,7 @@ module display(
     reg prev_isMealy_disp;
 
     initial begin
+        //initially refresh counter is zero
         prev_isMealy_disp = 1'b0;
             refresh_counter = 20'b00000000000000000000;
             Anode_Activate_disp = 4'b0000;
@@ -20,9 +21,10 @@ module display(
     
     always @(posedge clk_100MHz_disp)
     begin
-            
+            //increase counter
             refresh_counter = refresh_counter + 1;
 
+            //~100 times per second, change digit
             case (refresh_counter[19:18]) 
                 2'b00: begin
                     Anode_Activate_disp = 4'b0111; 

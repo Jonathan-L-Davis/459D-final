@@ -1,5 +1,0 @@
-1. link files you want to incorporate (.v snd .sv)
-xvlog -svlog ALU.sv -svlog reg_file.sv -svlog core.sv -svlog bus.sv -svlog gpio.sv -svlog tb_top.sv
-
-2. get output (where .m, "m" is the name of the module)
-xelab work.tb_top -R

@@ -9,6 +9,8 @@ module gpiomem (input clk, input reset, input rw_select,
  );
     reg [7:0] RAM[511:0];
     reg [7:0] out_buf;
+
+    //Address guide:
     //buttons,//503{3:0}
     //switches//504-505
     //leds,   //506-507
@@ -29,20 +31,13 @@ module gpiomem (input clk, input reset, input rw_select,
     end else begin
         //data_out <= RAM[address];
         if(rw_select == 1) begin // Write operation
-            if((address != 503)||(address != 504)||(address != 505)) begin
+            if((address != 503)||(address != 504)||(address != 505)) begin // if not 'read only'
                 RAM[address] <= data_in;
             end
-            /* / memory persistence
-            for(int i = 1; i < 512; i++) begin
-                RAM[address+i] <= RAM[address+i];
-            end//*/
         end else begin
             RAM <= RAM;
-            //data_out <= RAM[address];
             out_buf <= RAM[address];
         end
-        //out_buf <= RAM[address];
-        //*
 
         //buttons,//503{4:0}
         RAM[503] <= {4'b0000, buttons};
@@ -53,8 +48,8 @@ module gpiomem (input clk, input reset, input rw_select,
 
         //leds,   //506-507
         leds <= {RAM[507], RAM[506]};
-        //*/
         
+        //digits
         digit3 <= RAM[511];
         digit2 <= RAM[510];
         digit1 <= RAM[509];

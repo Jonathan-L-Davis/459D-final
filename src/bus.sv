@@ -92,6 +92,8 @@ module bus(
         end
     end
     
+
+    //assign outputs with proper signals
     assign core0_data_out = data_out[0];
     assign core1_data_out = data_out[1];
     assign data_in[0] = core0_data_in;

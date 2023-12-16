@@ -4,12 +4,14 @@ module data_cache(
     input [8:0] address,
     input [7:0] data_in,
     input rw,
+
+    //signals to and from core
     output reg grant_given_core,
     input grant_request_core,
-
     output reg [8:0] data_out,
     output reg hit, 
 
+    //signals to ans from bus
     output reg grant_request_bus,
     input grant_given_bus,
     input ext_mem_data_out,
@@ -37,7 +39,7 @@ module data_cache(
             ext_mem_rw <= 0; //read initially
 
         end else begin
-            // Calculate index and tag
+            // calculate index and tag
             if(grant_request_core) begin
                 int index = address % CACHE_SIZE;
                 int tag = address / CACHE_SIZE;
@@ -48,7 +50,7 @@ module data_cache(
                     if (rw) begin
                         // Write
                         cache_mem[index] <= data_in;
-                        // Write-through
+                        // Write-through, pass signals to system bus
                         grant_request_bus <= 1;
                         ext_mem_addr <= address;
                         ext_mem_data_in <= data_in;
@@ -67,11 +69,11 @@ module data_cache(
                     if (rw) begin
                         //write
                         cache_mem[index] <= data_in;
-                        // Write-through
+                        // Write-through to system bus
                         ext_mem_data_in <= data_in;
                         ext_mem_rw <= 1;
                     end else begin
-                        //read
+                        //read, by passing through to system bus
                         ext_mem_rw <= 0;
                         if(grant_given_bus) begin
                             cache_mem[index] <=  ext_mem_data_out;

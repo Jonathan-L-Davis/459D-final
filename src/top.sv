@@ -67,7 +67,9 @@ display disp(
     .LED_out_disp(LED_out)
 );
 
+//module instantiations. Certain signals are changed for simulation and waveforms
 
+//gpio/memory
 gpiomem mem_gpio (
 `ifdef SIM
     .clk(clk_100MHz),
@@ -84,7 +86,7 @@ gpiomem mem_gpio (
     .digit3(digit3), .digit2(digit2), .digit1(digit1), .digit0(digit0)    
 );
 
-
+//core 0
 core #(.pc_start(0)) core0 (
 `ifdef SIM
     .clk(clk_100MHz),
@@ -100,6 +102,8 @@ core #(.pc_start(0)) core0 (
     .address(address_cpu0)
     );
 
+
+//core 1
 core #(.pc_start(4)) core1 (
 `ifdef SIM
     .clk(clk_100MHz),
@@ -115,6 +119,8 @@ core #(.pc_start(4)) core1 (
     .address(address_cpu1)
     );
 
+
+//system bus
 bus system_bus(
 `ifdef SIM
     .clk(clk_100MHz),
@@ -143,10 +149,8 @@ bus system_bus(
     .rw(rw_mem)    
 );
 
-    /*
-    always @(negedge rst) begin
-        core1.PC <= 4;
-    end//*/
+  
+//force reset amd let simulation run for a bit. 
 `ifdef SIM
     //* //only for simulating programs
     initial begin

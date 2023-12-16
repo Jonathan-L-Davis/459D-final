@@ -32,9 +32,6 @@ module core
     bit [7:0] PC;
     bit [31:0] IR;
     
-    //instruction formats
-    //added these variables to parse instruction
-    
     //ALU controls
     bit [7:0] alu_data1,alu_data2,alu_result;
     bit [3:0] alu_op;// 0 for add, 1 for sub, 2 for and, 3 for or, 4 for slt

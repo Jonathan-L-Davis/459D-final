@@ -35,6 +35,8 @@ class RandInstructions;
         }
     }
 
+
+    //set operand based nn instruction, if I type, 3 opcodes possible
     constraint c_operand {
         if (instruction_type == RTYPE) {
             opcode == 6'b000000;
@@ -53,7 +55,7 @@ class RandInstructions;
         }
     }
 
-
+    //set function based on instruction, RTYPE
     constraint c_function{
         if (instruction_type == RTYPE){
            (funct == 6'b100000) || (funct == 6'b100010) || (funct == 6'b100100) || (funct == 6'b100101) || (funct == 6'b101010);
@@ -62,6 +64,7 @@ class RandInstructions;
         }
     }
 
+     //set rs, rt, rd based on instruction type
     constraint c_rsrt{
             if(instruction_type == RTYPE){ 
                 rs inside {[5'b00000:5'b00111]};
@@ -77,6 +80,7 @@ class RandInstructions;
             }
     }
 
+    //set immediate address based on instruction type
     constraint c_immediate{
         if (instruction_type == ITYPE){
             if((instruction_number >=0 || instruction_number <=31) && is_store_instruction){
@@ -87,6 +91,7 @@ class RandInstructions;
         }
     }
 
+    //set jump address based on instruction type
     constraint c_address{
         if (instruction_type == JTYPE){
             address inside {[26'b00_0000_0000_0000_0000_0000_0000:26'b00_0000_00000_0000_0001_1111_1111]};
@@ -95,6 +100,7 @@ class RandInstructions;
         }
     }
 
+    //combine all based on instruction type
     constraint c_instruction{
        if(instruction_type == RTYPE){ instruction == {opcode, rs, rt, rd, shamt, funct};
        }else if(instruction_type == ITYPE){ instruction == {opcode, rs, rt, immediate_addr};
@@ -104,6 +110,7 @@ class RandInstructions;
 
 endclass
 
+//class to store randomized instrucitons
 class RandTransactions;
     rand RandInstructions trans_array[];
 
@@ -151,6 +158,7 @@ module tb_top ();
 
 
     initial begin
+        //open the data file, randomize, and store random instructions. 
         Transactions = new();
 
         file = $fopen("testbench.dat", "w");
@@ -172,6 +180,8 @@ module tb_top ();
         // Close the file
         $fclose(file);
 
+
+        //start clock and reset
         clk_100MHz <= '0;
         forever #(1) clk_100MHz <= ~clk_100MHz;
 
@@ -192,6 +202,8 @@ module tb_top ();
     int loops = 0;
     
     always @(posedge  clk_100MHz) begin
+
+        //after so many clock cycles, rerandomize and reset the core with new instructions. 
          counter = counter + 1;
          if(counter == counterMax) begin
             iteration = 1;
@@ -234,6 +246,9 @@ module tb_top ();
         end
     end
 
+
+    //module declarations
+    //memory/gpio
     gpiomem mem_gpio (
         .clk(clk_100MHz),
         .rw_select(rw_mem),
@@ -246,7 +261,7 @@ module tb_top ();
         .digit3(digit3), .digit2(digit2), .digit1(digit1), .digit0(digit0)    
     );
 
-
+    //single core
     core #(.pc_start(0)) core0 (
         .clk(clk_100MHz),
         .reset(rst),
@@ -258,6 +273,8 @@ module tb_top ();
         .address(address_cpu0)
         );
 
+
+    //system bus
     bus system_bus(
         .clk(clk_100MHz),
         .reset(rst),
@@ -282,12 +299,15 @@ module tb_top ();
         .rw(rw_mem)    
     );
 
+
+    //whenever reset, read in the memory. 
     always @(posedge rst) begin
         $display("file rewritten");
         $readmemh("testbench.dat", mem_gpio.RAM);
     end
 
 
+        //code coverage for instruction opcodes. Cross coverage to ensure all combinations are met. 
         bit [31:0] last_inst, curr_inst; // New variables
 
         covergroup opcodes;
@@ -318,6 +338,7 @@ module tb_top ();
         core0_cov.start();
     end
 
+    //take samples on the decode cycles of the core, when IR is stable. 
     always @(posedge clk_100MHz) begin
         if (core0.state == 4) begin
             curr_inst = core0.IR;
